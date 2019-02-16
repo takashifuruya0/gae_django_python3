@@ -1,0 +1,24 @@
+{{msg}}
+
+<hr>
+
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Fee</th>
+            <th>Usage</th>
+            <th>Way</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in data %}
+        <tr>
+            <td>{{d.date}}</td>
+            <td>{{d.fee}}</td>
+            <td>{{d.usage}}</td>
+            <td>{{d.way}}</td>
+        </tr>
+       {% endfor %}
+    </tbody>
+</table>
