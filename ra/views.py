@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.template.response import TemplateResponse
 from google.cloud import datastore
 
@@ -6,7 +5,8 @@ from google.cloud import datastore
 def main(request):
     client = datastore.Client()
     query = client.query(kind='Kakeibo')
-    data = list(query.fetch())
+    query.order = ["-date"]
+    data = list(query.fetch(10))
     output = {
         "msg": "Hello world",
         "data": data,
