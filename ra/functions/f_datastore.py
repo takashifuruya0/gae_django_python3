@@ -15,8 +15,11 @@ class fds():
         self.kind = kind
         self.key = self.client.key(self.kind)
 
-    def get(self):
-        return list(self.query.fetch())
+    def get(self, num=None):
+        if num:
+            return list(self.query.fetch(num))
+        else:
+            return list(self.query.fetch())
 
     def all(self):
         self.query = self.client.query(kind=self.kind)

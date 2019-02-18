@@ -1,92 +1,136 @@
+<!DOCTYPE html>
+{% load static %}
+{% load humanize %}
 <html lang="ja">
     <head>
+        <title>Main</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" >
+        <!-- Font Awesome Icon -->
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.12/css/all.css" integrity="sha384-G0fIWCsCzJIMAVNQPfjH08cyYaUtMwjJwqiRKxxE/rx96Uroj1BtIQ6MLJuheaO9" crossorigin="anonymous">
+        <!--chart.js-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
+        <!--vue-->
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+        <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+        <!--Ajax-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
     </head>
 
     <body>
-        <div>
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="alert alert-{{ msg.tags }} alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <strong>{{ msg.tags }}</strong> {{msg}}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="container-fluid">
             <h2>Vue</h2>
-            <h3>#1</h3>
-            <div id="app">
-              [[ message ]]
-            </div>
-            <h3>#2</h3>
-            <div id="app-2">
-              <span v-bind:title="message">
-                Hover your mouse over me for a few seconds
-                to see my dynamically bound title!
-              </span>
-            </div>
-            <h3>#3</h3>
-            <div id="app-3">
-              <span v-if="seen">Now you see me</span>
-            </div>
-            <h3>#4</h3>
-            <div id="app-4">
-              <ol>
-                <li v-for="todo in todos">
-                  [[ todo.text ]]
-                </li>
-              </ol>
-            </div>
-            <h3>#5</h3>
-            <div id="app-5">
-              <p>[[ message ]]</p>
-              <button v-on:click="reverseMessage">Reverse Message</button>
-            </div>
-            <h3>#6</h3>
-            <div id="app-6">
-              <p>[[ message ]]</p>
-              <input v-model="message">
-            </div>
-            <h3>#7</h3>
-            <div id="app-7">
-              <ol>
-                <!--
-                  各 todo-item の内容を表す todo オブジェクトを与えます。
-                  これにより内容は動的に変化します。
-                  また後述する "key" を各コンポーネントに提供する必要があります。
-                -->
-                <todo-item
-                  v-for="item in groceryList"
-                  v-bind:todo="item"
-                  v-bind:key="item.id"
-                ></todo-item>
-              </ol>
-            </div>
-        </div>
-        <hr>
+            <div class="row">
+                <div id="app" class="col-sm-6">
+                    <h3>#1</h3>
+                  [[ message ]]
+                </div>
+                <div id="app-2" class="col-sm-6">
+                    <h3>#2</h3>
+                    <span v-bind:title="message">
+                        Hover your mouse over me for a few seconds
+                        to see my dynamically bound title!
+                    </span>
+                </div>
+                <div id="app-3" class="col-sm-6">
+                    <h3>#3</h3>
+                    <span v-if="seen">Now you see me</span>
+                </div>
+                <div id="app-4" class="col-sm-6">
+                    <h3>#4</h3>
+                    <ol>
+                        <li v-for="todo in todos">
+                            [[ todo.text ]]
+                        </li>
+                    </ol>
+                </div>
+                <div id="app-5" class="col-sm-6">
+                    <h3>#5</h3>
+                  <p>[[ message ]]</p>
+                  <button v-on:click="reverseMessage" class="btn btn-primary">Reverse Message</button>
+                </div>
 
-        <div>
+                <div id="app-6" class="col-sm-6">
+                    <h3>#6</h3>
+                  <p>[[ message ]]</p>
+                  <input v-model="message">
+                </div>
+
+                <div id="app-7" class="col-sm-6">
+                    <h3>#7</h3>
+                  <ol>
+                    <!--
+                      各 todo-item の内容を表す todo オブジェクトを与えます。
+                      これにより内容は動的に変化します。
+                      また後述する "key" を各コンポーネントに提供する必要があります。
+                    -->
+                    <todo-item
+                      v-for="item in groceryList"
+                      v-bind:todo="item"
+                      v-bind:key="item.id"
+                    ></todo-item>
+                  </ol>
+                </div>
+            </div> <!--row-->
+
+            <hr>
             <h2>Django</h2>
-            <div>
-                {{msg}}
+            <div class="row">
+                <div class="col-12">
+                    {{msg}}
+                </div>
             </div>
-        </div>
-        <hr>
 
-        <div>
+            <hr>
             <h2>Datastore</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Fee</th>
-                        <th>Usage</th>
-                        <th>Way</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for d in data %}
-                    <tr>
-                        <td>{{d.date}}</td>
-                        <td>{{d.fee}}</td>
-                        <td>{{d.usage}}</td>
-                        <td>{{d.way}}</td>
-                    </tr>
-                   {% endfor %}
-                </tbody>
-            </table>
+            <div class="row">
+                <div class="col-sm-6">
+                    <h3>Data</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Datetime</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in data %}
+                            <tr>
+                                <td>{{d.datetime}}</td>
+                                <td>{{d.name}}</td>
+                                <td>{{d.age}}</td>
+                            </tr>
+                           {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-sm-6">
+                    <h3>Create</h3>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <table class="table">
+                            {{ form }}
+                        </table>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <script>
