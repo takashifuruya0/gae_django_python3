@@ -112,7 +112,7 @@
                         <tbody>
                             {% for d in data %}
                             <tr>
-                                <td>{{d.datetime}}</td>
+                                <td>{{d.datetime|naturaltime}}</td>
                                 <td>{{d.name}}</td>
                                 <td>{{d.age}}</td>
                             </tr>
@@ -128,6 +128,7 @@
                             {{ form }}
                         </table>
                         <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="reset" class="btn btn-danger">Reset</button>
                     </form>
                 </div>
             </div>
