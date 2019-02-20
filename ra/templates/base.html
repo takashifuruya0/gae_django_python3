@@ -29,8 +29,12 @@
         <!-- Sidebar  -->
         <nav id="sidebar">
             <div class="sidebar-header">
-                <h3>FK-Manage</h3>
-                <strong>FK</strong>
+                <a href="{% url 'ra:main' %}">
+                  <h3>FK-Manage</h3>
+                </a>
+                <a href="{% url 'ra:main' %}">
+                  <strong>FK</strong>
+                </a>
             </div>
 
             <ul class="list-unstyled components">
@@ -41,7 +45,7 @@
                     </a>
                     <ul class="collapse list-unstyled" id="kakeiboSubmenu">
                         <li>
-                            <a href="{% url 'ra:training' %}">Home 1</a>
+                            <a href="{% url 'ra:training' %}">Training</a>
                         </li>
                         <li>
                             <a href="#">Home 2</a>

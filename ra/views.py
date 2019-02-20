@@ -52,10 +52,32 @@ def ajax(request):
 
 def training(request):
     if request.method == "POST":
+        form = TrainingForm(request.POST)
+        form.is_valid()
+        post_data = form.cleaned_data
+        fds = f_datastore.fds("Training")
+        fds.data = {
+            "name": post_data.get("name"),
+            "weight": post_data.get("weight"),
+            "no_set": post_data.get("no_set"),
+            "datetime": post_data.get("datetime"),
+        }
+        if fds.create():
+            messages.success(request, "Saved")
+        else:
+            messages.error(request, "Failed")
+            logging.error("Failed")
         return redirect('ra:training')
     elif request.method == "GET":
-        form = TrainingForm(initial={"datetime": datetime.today(), "no_set": 3,})
+        name = request.GET.get("name", None)
+        form = TrainingForm(initial={"datetime": datetime.today(), "no_set": 3, })
+        training_data = f_datastore.fds("Training")
+        if name:
+            data = training_data.all().filter("name", "=", name).get(10)
+        else:
+            data = training_data.all().order("-datetime").get(10)
         output = {
             "form": form,
+            "data": data,
         }
         return TemplateResponse(request, "ra/training.html", output)

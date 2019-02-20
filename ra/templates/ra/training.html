@@ -17,6 +17,35 @@
     <button type="submit" class="btn btn-primary">Submit</button>
   </div>
 </div>
+
+<hr>
+<div class="row">
+  {% for d in data %}
+  <div class="col-12 col-sm-6 col-md-4">
+    <div class="card">
+      <div class="card-header">
+        {{d.name}}
+      </div>
+      <div class="card-body">
+        <table class="table table-light">
+          <tr>
+            <th>Datetime</th>
+            <td>{{d.datetime | date}}</td>
+          </tr>
+          <tr>
+            <th>Weight</th>
+            <td>{{d.weight}}kg</td>
+          </tr>
+          <tr>
+            <th>Set</th>
+            <td>{{d.no_set}}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
 {% endblock %}
 
 {% block script %}
