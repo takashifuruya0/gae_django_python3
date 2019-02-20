@@ -32,7 +32,7 @@
     <div id="app-5" class="col-sm-6">
         <h3>#5</h3>
       <p>[[ message ]]</p>
-      <button v-on:click="reverseMessage" class="btn btn-primary">Reverse Message</button>
+      <button v-on:click="reverseMessage" v-bind:class="classObj">[[domsg]] Message</button>
     </div>
 
     <div id="app-6" class="col-sm-6">
@@ -55,6 +55,16 @@
           v-bind:key="item.id"
         ></todo-item>
       </ol>
+    </div>
+
+    <div id="app-8" class="col-sm-6">
+        <h3>#8</h3>
+        <div>
+            <button v-on:click="a">POST</button>
+        </div>
+        <div>
+            <p>[[ b ]]</p>
+        </div>
     </div>
 </div> <!--row-->
 
@@ -150,11 +160,20 @@
       el: '#app-5',
       delimiters: delimiters,
       data: {
-        message: 'Hello Vue.js!'
+        message: 'Hello Vue.js!',
+        classObj: "btn btn-primary",
+        domsg: "Reverse"
       },
       methods: {
         reverseMessage: function () {
           this.message = this.message.split('').reverse().join('')
+          if(this.classObj=="btn btn-primary"){
+              this.classObj = "btn btn-danger"
+              this.domsg = "Init"
+          }else{
+              this.classObj = "btn btn-primary"
+              this.domsg = "Reverse"
+          }
         }
       }
     })
@@ -173,7 +192,6 @@
       template: '<li>[[ todo.text ]]</li>',
       delimiters: delimiters,
     })
-
     var app7 = new Vue({
       el: '#app-7',
       data: {
@@ -184,5 +202,18 @@
         ]
       }
     })
+
+    // 8
+    var app8 = new Vue({
+      el:"#app-8",　//vueのインスタンスが紐づくDOM要素ののセレクタ
+      data:{b: null},
+      delimiters: delimiters,
+      methods: {
+          a: function() {
+              axios.get("/ajax/").then((r) => {this.b = r.data.your_surprise_txt})
+          },
+      },
+    })
 </script>
+
 {% endblock %}

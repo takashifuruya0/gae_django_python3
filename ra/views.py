@@ -1,11 +1,12 @@
 from django.template.response import TemplateResponse
-from django.shortcuts import redirect
+from django.shortcuts import HttpResponse, Http404, redirect
 # from google.cloud import datastore
 from datetime import datetime
 import logging
 from ra.functions import f_datastore
 from ra.form import FmanageForm
 from django.contrib import messages
+import json
 
 
 # Create your views here.
@@ -18,6 +19,7 @@ def main(request):
             "msg": "Hello world",
             "data": data,
             "form": form,
+            "today": datetime.today()
         }
         return TemplateResponse(request, 'ra/main.html', output)
     elif request.method == "POST":
@@ -36,3 +38,24 @@ def main(request):
             messages.error(request, "Failed")
             logging.error("Failed")
         return redirect("ra:main")
+
+
+def ajax(request):
+    if request.method in ('POST', "GET"):
+        data = {
+            'your_surprise_txt': "surprise_txt",
+        }
+        response = json.dumps(data)  # JSON形式に直して・・
+        return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・・
+    else:
+        raise Http404  # GETリクエストを404扱いにしているが、実際は別にしなくてもいいかも
+
+def affiliate(request):
+    card = {
+        "header": "Affiliate",
+        "body": "This is a landing page",
+    }
+    output = {
+        "data": [card for i in range(10)],
+    }
+    return TemplateResponse(request, "ra/affiliate.html", output)

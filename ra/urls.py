@@ -5,4 +5,6 @@ app_name = 'ra'
 
 urlpatterns = [
     url(r'^$', views.main, name='main'),
+    url(r'^ajax/$', views.ajax, name='ajax'),
+    url(r'^affiliate/$', views.affiliate, name='affiliate')
 ]

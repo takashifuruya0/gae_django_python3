@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Affiliate{% endblock %}
+{% block body %}
+<div class="row">
+  <div class="col-12">
+      <h2>Title</h2>
+  </div>
+  {% for card in data %}
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-header">
+        {{ card.header }}
+      </div>
+      <div class="card-body">
+        {{ card.body }}
+      </div>
+    </div>
+  </div>
+  {%  endfor %}
+</div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}
