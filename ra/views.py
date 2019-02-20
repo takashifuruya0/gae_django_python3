@@ -4,7 +4,7 @@ from django.shortcuts import HttpResponse, Http404, redirect
 from datetime import datetime
 import logging
 from ra.functions import f_datastore
-from ra.form import FmanageForm
+from ra.form import FmanageForm, TrainingForm
 from django.contrib import messages
 import json
 
@@ -50,12 +50,12 @@ def ajax(request):
     else:
         raise Http404  # GETリクエストを404扱いにしているが、実際は別にしなくてもいいかも
 
-def affiliate(request):
-    card = {
-        "header": "Affiliate",
-        "body": "This is a landing page",
-    }
-    output = {
-        "data": [card for i in range(10)],
-    }
-    return TemplateResponse(request, "ra/affiliate.html", output)
+def training(request):
+    if request.method == "POST":
+        return redirect('ra:training')
+    elif request.method == "GET":
+        form = TrainingForm(initial={"datetime": datetime.today(), "no_set": 3,})
+        output = {
+            "form": form,
+        }
+        return TemplateResponse(request, "ra/training.html", output)
