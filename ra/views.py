@@ -13,7 +13,7 @@ import json
 def main(request):
     if request.method == "GET":
         form = FmanageForm(initial={"datetime": datetime.today()})
-        fds = f_datastore.fds("fmanage")
+        fds = f_datastore.Fds("fmanage")
         data = fds.all().order("-datetime").get(10)
         output = {
             "msg": "Hello world",
@@ -26,7 +26,7 @@ def main(request):
         form = FmanageForm(request.POST)
         form.is_valid()
         post_data = form.cleaned_data
-        fds = f_datastore.fds("fmanage")
+        fds = f_datastore.Fds("fmanage")
         fds.data = {
             "name": post_data.get("name"),
             "age": post_data.get("age"),
@@ -43,23 +43,24 @@ def main(request):
 def ajax(request):
     if request.method in ('POST', "GET"):
         data = {
-            'your_surprise_txt': "surprise_txt",
+            'your_surprise_txt': "The number of training: {}".format(f_datastore.Training().all().get().__len__()),
         }
         response = json.dumps(data)  # JSON形式に直して・・
         return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・・
     else:
         raise Http404  # GETリクエストを404扱いにしているが、実際は別にしなくてもいいかも
 
+
 def training(request):
     if request.method == "POST":
         form = TrainingForm(request.POST)
         form.is_valid()
         post_data = form.cleaned_data
-        fds = f_datastore.fds("Training")
+        fds = f_datastore.Fds("Training")
         fds.data = {
             "name": post_data.get("name"),
             "weight": post_data.get("weight"),
-            "no_set": post_data.get("no_set"),
+            "set": post_data.get("set"),
             "datetime": post_data.get("datetime"),
         }
         if fds.create():
@@ -70,8 +71,8 @@ def training(request):
         return redirect('ra:training')
     elif request.method == "GET":
         name = request.GET.get("name", None)
-        form = TrainingForm(initial={"datetime": datetime.today(), "no_set": 3, })
-        training_data = f_datastore.fds("Training")
+        form = TrainingForm(initial={"datetime": datetime.today(), "set": 3, })
+        training_data = f_datastore.Fds("Training")
         if name:
             data = training_data.all().filter("name", "=", name).get(10)
         else:
@@ -79,5 +80,6 @@ def training(request):
         output = {
             "form": form,
             "data": data,
+            "length": data.__len__()
         }
         return TemplateResponse(request, "ra/training.html", output)

@@ -2,7 +2,7 @@ from google.cloud import datastore
 from datetime import datetime
 import logging
 
-class fds():
+class Fds():
     client = None
     key = None
     query = None
@@ -40,9 +40,26 @@ class fds():
         return self
 
 
-class test(fds):
+class Test(Fds):
+    kind = "Test"
     data = {
         "name": None,
         "age": None,
         "datetime": None,
     }
+
+    def __init__(self):
+        super().__init__(self.kind)
+
+
+class Training(Fds):
+    kind = "Training"
+    data = {
+        "name": None,
+        "set": None,
+        "weight": None,
+        "datetime": None,
+    }
+
+    def __init__(self):
+        super().__init__(self.kind)

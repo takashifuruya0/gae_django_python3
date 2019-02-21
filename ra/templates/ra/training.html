@@ -6,7 +6,7 @@
 {% block body %}
 <div class="row">
   <div class="col-12">
-      <h2>Title</h2>
+      <h2>Record your trainig!</h2>
   </div>
   <div class="col-12">
     <form method="POST">
@@ -20,11 +20,14 @@
 
 <hr>
 <div class="row">
+  <div class="col-12">
+    <h3>You have {{ length }} data</h3>
+  </div>
   {% for d in data %}
   <div class="col-12 col-sm-6 col-md-4">
     <div class="card">
       <div class="card-header">
-        {{d.name}}
+        <a href="?name={{d.name}}">{{d.name}}</a>
       </div>
       <div class="card-body">
         <table class="table table-light">
@@ -38,7 +41,7 @@
           </tr>
           <tr>
             <th>Set</th>
-            <td>{{d.no_set}}</td>
+            <td>{{d.set}}</td>
           </tr>
         </table>
       </div>
