@@ -21,8 +21,7 @@
 <hr>
 <div class="row">
   <div class="col-12">
-    <h3>{{name_chart}}</h3>
-    You have {{length_chart}} data.
+    <h3>{{name_chart}} <span class="badge bg-primary">{{length_chart}}</span> </h3>
     <canvas id="chart"></canvas>
   </div>
 </div>
@@ -30,34 +29,28 @@
 <hr>
 <div class="row">
   <div class="col-12">
-    <h3>All the data</h3>
-    You have {{ length }} data
+    <h3>All the data <span class="badge bg-primary">{{length}}</span> </h3>
   </div>
-  {% for d in data %}
-  <div class="col-6 col-sm-4 col-md-3">
-    <div class="card">
-      <div class="card-header">
-        <a href="?name={{d.name}}">{{d.name}}</a>
-      </div>
-      <div class="card-body">
-        <table class="table table-light">
-          <tr>
-            <th>Datetime</th>
-            <td>{{d.datetime | date}}</td>
-          </tr>
-          <tr>
-            <th>Weight</th>
-            <td>{{d.weight}}kg</td>
-          </tr>
-          <tr>
-            <th>Set</th>
-            <td>{{d.set}}</td>
-          </tr>
-        </table>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
+  <table class="table table-light table-sm">
+    <thead>
+      <tr>
+        <th>Datetime</th>
+        <th>Name</th>
+        <th>Weight</th>
+        <th>Set</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in data %}
+      <tr>
+        <td>{{d.datetime|date}}</td>
+        <td><a href="?name={{d.name}}">{{d.name}}</a></td>
+        <td>{{d.weight}}</td>
+        <td>{{d.set}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}
 
