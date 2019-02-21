@@ -1,0 +1,7 @@
+indexes:
+
+- kind: Training
+  properties:
+  - name: name
+  - name: datetime
+    direction: desc

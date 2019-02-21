@@ -70,16 +70,32 @@ def training(request):
             logging.error("Failed")
         return redirect('ra:training')
     elif request.method == "GET":
-        name = request.GET.get("name", None)
+        # GETパラメータ
+        name_chart = request.GET.get("name", "レッグプレス")
+        # form
         form = TrainingForm(initial={"datetime": datetime.today(), "set": 3, })
+        # datastore
         training_data = f_datastore.Fds("Training")
-        if name:
-            data = training_data.all().filter("name", "=", name).get(10)
-        else:
-            data = training_data.all().order("-datetime").get(10)
+        res = dict()
+        data = training_data.all().order("-datetime").get()
+        for d in data:
+            name = d['name']
+            tmp = {
+                "datetime": d['datetime'],
+                "weight": d['weight'],
+                "set": d['set']
+            }
+            if name in res.keys():
+                res[name].append(tmp)
+            else:
+                res[name] = [tmp]
         output = {
+            "today": datetime.today(),
             "form": form,
             "data": data,
-            "length": data.__len__()
+            "length": data.__len__(),
+            "data_chart": res[name_chart],
+            "name_chart": name_chart,
+            "length_chart": res[name_chart].__len__(),
         }
         return TemplateResponse(request, "ra/training.html", output)

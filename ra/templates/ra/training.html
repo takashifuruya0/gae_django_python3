@@ -6,13 +6,13 @@
 {% block body %}
 <div class="row">
   <div class="col-12">
-      <h2>Record your trainig!</h2>
+    <h2><i class="fas fa-dumbbell"></i> Record your trainig!</h2>
   </div>
   <div class="col-12">
     <form method="POST">
     {% csrf_token %}
     <table class="table table-light">
-        {{ form }}
+      {{ form }}
     </table>
     <button type="submit" class="btn btn-primary">Submit</button>
   </div>
@@ -21,10 +21,20 @@
 <hr>
 <div class="row">
   <div class="col-12">
-    <h3>You have {{ length }} data</h3>
+    <h3>{{name_chart}}</h3>
+    You have {{length_chart}} data.
+    <canvas id="chart"></canvas>
+  </div>
+</div>
+
+<hr>
+<div class="row">
+  <div class="col-12">
+    <h3>All the data</h3>
+    You have {{ length }} data
   </div>
   {% for d in data %}
-  <div class="col-12 col-sm-6 col-md-4">
+  <div class="col-6 col-sm-4 col-md-3">
     <div class="card">
       <div class="card-header">
         <a href="?name={{d.name}}">{{d.name}}</a>
@@ -52,4 +62,38 @@
 {% endblock %}
 
 {% block script %}
+<script>
+var lineChartData = {
+  labels : [{%for dc in data_chart%} "{{dc.datetime|date}}", {%endfor%}].reverse(),
+  datasets : [
+    {
+      label: "Weight",
+      data: [{%for dc in data_chart%} {{dc.weight}}, {%endfor%}].reverse(),
+      backgroundColor: "rgba(53,255,151,0.4)",
+      // fill: false,
+    },
+  ]
+}
+var options = {
+  responsive: true,
+  scales: {
+    yAxes: [{ticks: {beginAtZero: true, min: 0,}}]
+  }
+}
+var ctx = document.getElementById("chart").getContext("2d");
+if (window.innerWidth > 768) {
+    ctx.canvas.width = 1000;
+    ctx.canvas.height = 350;
+  }else{
+    ctx.canvas.width = 450;
+    ctx.canvas.height = 450;
+  }
+var myChart = new Chart(ctx, {
+    type: "line",
+    data: lineChartData,
+    options: options,
+    // 下記を追加すると線がまっすぐになります
+    /* bezierCurve: false */
+});
+</script>
 {% endblock %}

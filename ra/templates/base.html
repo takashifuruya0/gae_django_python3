@@ -13,6 +13,8 @@
     <!-- Font Awesome JS -->
     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
+    <!--<script defer src="https://use.fontawesome.com/releases/v5.7.2/js/all.js" integrity="sha384-0pzryjIRos8mFBWMzSSZApWtPl/5++eIfzYmTgBBmXYdhvxPc+XcFEk+zJwDgWbP" crossorigin="anonymous"></script>-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
     <!--chart.js-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
     <!--vue-->
@@ -45,7 +47,7 @@
                     </a>
                     <ul class="collapse list-unstyled" id="kakeiboSubmenu">
                         <li>
-                            <a href="{% url 'ra:training' %}">Training</a>
+                            <a href="#">Home 1</a>
                         </li>
                         <li>
                             <a href="#">Home 2</a>
@@ -94,9 +96,8 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="#">
-                        <i class="fas fa-image"></i>
-                        Portfolio
+                    <a href="{% url 'ra:training' %}">
+                        <i class="fas fa-dumbbell"></i> Training
                     </a>
                 </li>
                 <li>
