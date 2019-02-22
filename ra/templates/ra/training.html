@@ -5,10 +5,8 @@
 {% block title %}Training{% endblock %}
 {% block body %}
 <div class="row">
-  <div class="col-12">
-    <h2><i class="fas fa-dumbbell"></i> Record your trainig!</h2>
-  </div>
-  <div class="col-12">
+  <div class="col-12 col-sm-6">
+    <h3><i class="fas fa-dumbbell"></i> Record your trainig!</h3>
     <form method="POST">
     {% csrf_token %}
     <table class="table table-light">
@@ -16,11 +14,8 @@
     </table>
     <button type="submit" class="btn btn-primary">Submit</button>
   </div>
-</div>
 
-<hr>
-<div class="row">
-  <div class="col-12">
+  <div class="col-12 col-sm-6">
     <h3>{{name_chart}} <span class="badge bg-primary">{{length_chart}}</span> </h3>
     <canvas id="chart"></canvas>
   </div>
@@ -76,7 +71,7 @@ var options = {
 var ctx = document.getElementById("chart").getContext("2d");
 if (window.innerWidth > 768) {
     ctx.canvas.width = 1000;
-    ctx.canvas.height = 350;
+    ctx.canvas.height = 750;
   }else{
     ctx.canvas.width = 450;
     ctx.canvas.height = 450;

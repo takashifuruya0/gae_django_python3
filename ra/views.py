@@ -51,6 +51,18 @@ def ajax(request):
         raise Http404  # GETリクエストを404扱いにしているが、実際は別にしなくてもいいかも
 
 
+def wordcloud(request):
+    testdata = [
+        {"word": "イノシシ", "count": 9},
+        {"word": "おにやんま", "count": 3},
+        {"word": "ゆるっと", "count": 4},
+        {"word": "映画", "count": 3},
+        {"word": "河津桜", "count": 2},
+        {"word": "ふるや", "count": 10},
+    ]
+    return TemplateResponse(request, 'ra/wordcloud.html', {'testdata': testdata})
+
+
 def training(request):
     if request.method == "POST":
         form = TrainingForm(request.POST)
@@ -85,7 +97,6 @@ def training(request):
                 "set": d['set']
             }
             res.append(tmp)
-
         output = {
             "today": datetime.today(),
             "form": form,
