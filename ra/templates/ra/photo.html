@@ -20,10 +20,14 @@
 
 <div class="row">
   {% for p in photo %}
-  <div class="col-3">
+  <div class="col-6 col-md-4 col-lg-3">
     <div class="card">
       <img class="card-img-top"
+           {% if p.path_resized %}
+           src="{%static p.path_resized %}"
+           {% else %}
            src="{%static p.path %}"
+           {% endif %}
            width="100%"
            title="{{p.datetime|date}}"
            data-toggle="modal" data-target="#{{p.id}}"
@@ -49,15 +53,31 @@
 
         <div class="modal-body">
           <h5>
-            <a class="badge bg-warning" href="?prefecture={{p.prefecture}}">
-              {{p.prefecture}}
-            </a>
-            <a class="badge bg-info" href="?country={{p.country}}">
-              {{p.country}}
-            </a>
+
+
           </h5>
+
           <img src="{%static p.path %}" width="100%">
-          <p>{{p.comment}}</p>
+          <table class="table">
+            <tr>
+              <td>
+                <h5>
+                  Country:
+                  <a class="badge bg-info" href="?country={{p.country}}">{{p.country}}</a>
+                </h5>
+              </td>
+              <td>
+                <h5>
+                  Prefecture:
+                  <a class="badge bg-warning" href="?prefecture={{p.prefecture}}">{{p.prefecture}}</a>
+                </h5>
+              </td>
+            </tr>
+            <tr>
+              <th>Comment</th>
+              <td>{{p.comment}}</td>
+            </tr>
+          </table>
         </div>
         <div class="modal-footer">
           {{p.datetime|date}}

@@ -123,5 +123,7 @@ def photo(request):
     output = {
         "photo": photo.get(),
         "labels": labels,
+        "title": "Find where you wanna visit !",
+        "today": datetime.today(),
     }
     return TemplateResponse(request, "ra/photo.html", output)

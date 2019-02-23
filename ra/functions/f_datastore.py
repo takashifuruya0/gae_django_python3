@@ -44,6 +44,10 @@ class Fds():
         self.query.distinct_on = [property]
         return self
 
+    def update(self):
+        self.put(self.entity)
+        return self.entity
+
 
 class Test(Fds):
     kind = "Test"
