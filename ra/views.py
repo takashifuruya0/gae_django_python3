@@ -110,8 +110,18 @@ def training(request):
 
 
 def photo(request):
-    photo = f_datastore.Photo().get()
+    photo = f_datastore.Photo()
+    labels = list()
+    for f in ("prefecture", "country"):
+        param = request.GET.get(f, None)
+        if param:
+            labels.append({
+                "key": f,
+                "val": param,
+            })
+            photo.filter(f, "=", param)
     output = {
-        "photo": photo,
+        "photo": photo.get(),
+        "labels": labels,
     }
     return TemplateResponse(request, "ra/photo.html", output)
