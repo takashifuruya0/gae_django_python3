@@ -14,7 +14,7 @@ def main(request):
     if request.method == "GET":
         form = FmanageForm(initial={"datetime": datetime.today()})
         fds = f_datastore.Fds("fmanage")
-        data = fds.all().order("-datetime").get(10)
+        data = fds.order("-datetime").get(10)
         output = {
             "msg": "Hello world",
             "data": data,
@@ -43,7 +43,7 @@ def main(request):
 def ajax(request):
     if request.method in ('POST', "GET"):
         data = {
-            'your_surprise_txt': "The number of training: {}".format(f_datastore.Training().all().get().__len__()),
+            'your_surprise_txt': "The number of training: {}".format(f_datastore.Training().get().__len__()),
         }
         response = json.dumps(data)  # JSON形式に直して・・
         return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・・
@@ -53,12 +53,12 @@ def ajax(request):
 
 def wordcloud(request):
     testdata = [
-        {"word": "イノシシ", "count": 9},
-        {"word": "おにやんま", "count": 3},
-        {"word": "ゆるっと", "count": 4},
-        {"word": "映画", "count": 3},
-        {"word": "河津桜", "count": 2},
-        {"word": "ふるや", "count": 10},
+        {"word": "イノシシ", "count": 9, "url": "/photo/"},
+        {"word": "おにやんま", "count": 3, "url": "/photo/"},
+        {"word": "ゆるっと", "count": 4, "url": "/photo/"},
+        {"word": "映画", "count": 3, "url": "/photo/"},
+        {"word": "河津桜", "count": 2, "url": "/photo/"},
+        {"word": "ふるや", "count": 10, "url": "/photo/"},
     ]
     return TemplateResponse(request, 'ra/wordcloud.html', {'testdata': testdata})
 
@@ -89,8 +89,8 @@ def training(request):
         # datastore
         training_data = f_datastore.Fds("Training")
         res = list()
-        data = training_data.all().order("-datetime").get()
-        for d in training_data.all().filter("name", "=", name_chart).order("-datetime").get():
+        data = training_data.order("-datetime").get()
+        for d in training_data.filter("name", "=", name_chart).order("-datetime").get():
             tmp = {
                 "datetime": d['datetime'],
                 "weight": d['weight'],
@@ -107,3 +107,11 @@ def training(request):
             "length_chart": res.__len__(),
         }
         return TemplateResponse(request, "ra/training.html", output)
+
+
+def photo(request):
+    photo = f_datastore.Photo().get()
+    output = {
+        "photo": photo,
+    }
+    return TemplateResponse(request, "ra/photo.html", output)

@@ -7,5 +7,6 @@ urlpatterns = [
     url(r'^$', views.main, name='main'),
     url(r'^ajax/$', views.ajax, name='ajax'),
     url(r'^wordcloud/$', views.wordcloud, name='wordcloud'),
-    url(r'^training/$', views.training, name='training')
+    url(r'^training/$', views.training, name='training'),
+    url(r'^photo/$', views.photo, name='photo'),
 ]

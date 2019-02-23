@@ -14,6 +14,7 @@ class Fds():
         self.client = datastore.Client()
         self.kind = kind
         self.key = self.client.key(self.kind)
+        self.query = self.client.query(kind=self.kind)
 
     def get(self, num=None):
         if num:
@@ -39,6 +40,10 @@ class Fds():
         self.query.order = [property]
         return self
 
+    def distinct(self, property):
+        self.query.distinct_on = [property]
+        return self
+
 
 class Test(Fds):
     kind = "Test"
@@ -59,6 +64,21 @@ class Training(Fds):
         "set": None,
         "weight": None,
         "datetime": None,
+    }
+
+    def __init__(self):
+        super().__init__(self.kind)
+
+
+class Photo(Fds):
+    kind = "Photo"
+    data = {
+        "comment": None,
+        "sitename": None,
+        "prefecture": None,
+        "country": None,
+        "path": None,
+        "datetime": None
     }
 
     def __init__(self):

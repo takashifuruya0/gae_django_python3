@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Photo{% endblock %}
+{% block body %}
+<div class="row">
+  {% for p in photo %}
+  <div class="col-4">
+    <div class="card">
+      <img class="card-img-top" src="{%static p.path %}" width="100%" title="{{p.datetime|date}}">
+      <div class="card-body">
+        <h5 class="card-title">{{p.sitename}}@{{p.prefecture}} <label class="badge bg-info">{{p.country}}</label></h5>
+        <p class="card-text">{{p.comment}}</p>
+      </div>
+    </div>
+  </div>
+  <hr>
+  {% endfor %}
+</div>
+{% endblock %}
