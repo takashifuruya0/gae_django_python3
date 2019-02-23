@@ -110,7 +110,6 @@ def training(request):
 
 
 def photo(request):
-    photo = f_datastore.Photo()
     labels = list()
     for f in ("prefecture", "country"):
         param = request.GET.get(f, None)
@@ -119,11 +118,43 @@ def photo(request):
                 "key": f,
                 "val": param,
             })
-            photo.filter(f, "=", param)
+            photo = f_datastore.Photo().filter(f, "=", param).get()
+            break
+        else:
+            photo = f_datastore.Photo().get()
+    # wordcloud
+    wordcloud_list = list()
+    prefecture_list = {
+        f['prefecture']: {
+            "word": f['prefecture'],
+            "count": 0,
+            "url": "?prefecture={}".format(f['prefecture'])
+        } for f in f_datastore.Photo().distinct("prefecture").get()
+    }
+    country_list = {
+        f['country']: {
+            "word": f['country'],
+            "count": 0,
+            "url": "?country={}".format(f['country'])
+        } for f in f_datastore.Photo().distinct("country").get()
+    }
+    for p in photo:
+        prefecture_list[p['prefecture']]['count'] += 1
+        country_list[p['country']]['count'] += 1
+    for pl in prefecture_list.values():
+        if pl['count'] > 0:
+            wordcloud_list.append(pl)
+    for cl in country_list.values():
+        if cl['count'] > 0:
+            wordcloud_list.append(cl)
+    # output
     output = {
-        "photo": photo.get(),
+        "photo": photo,
         "labels": labels,
         "title": "Find where you wanna visit !",
         "today": datetime.today(),
+        "wordcloud_list": wordcloud_list,
     }
+    for w in wordcloud_list:
+        print(w)
     return TemplateResponse(request, "ra/photo.html", output)
