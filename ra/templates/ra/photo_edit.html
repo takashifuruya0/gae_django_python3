@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+<div class="row">
+  <div class="col-12 col-md-6">
+    <img src="{% static path %}" width="100%">
+  </div>
+  <div class="col-12 col-md-6">
+    <form method="POST">
+      {% csrf_token %}
+      <table class="table">
+        {{form}}
+      </table>
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a class="btn btn-secondary" href="{% url 'ra:photo' %}">Back</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

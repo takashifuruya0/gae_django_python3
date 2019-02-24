@@ -16,11 +16,20 @@ class Fds():
         self.key = self.client.key(self.kind)
         self.query = self.client.query(kind=self.kind)
 
-    def get(self, num=None):
+    def get_list(self, num=None):
         if num:
             return list(self.query.fetch(num))
         else:
             return list(self.query.fetch())
+
+    def get_entity(self):
+        self.entity = list(self.query.fetch())[0]
+        return self
+
+    def get_entity_by_id(self, id):
+        self.key = self.client.key(self.kind, int(id))
+        self.entity = self.client.get(key=self.key)
+        return self
 
     def all(self):
         self.query = self.client.query(kind=self.kind)
@@ -45,7 +54,7 @@ class Fds():
         return self
 
     def update(self):
-        self.put(self.entity)
+        self.client.put(self.entity)
         return self.entity
 
 
@@ -82,6 +91,7 @@ class Photo(Fds):
         "prefecture": None,
         "country": None,
         "path": None,
+        "path_resized": None,
         "datetime": None
     }
 

@@ -3,9 +3,26 @@
 {% block title %}Photo{% endblock %}
 {% block body %}
 <div class="row">
-  <div class="col-12">
-    <div id="wordcloud"></div>
+
+  <div class="col-6">
+    <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+      <i class="fas fa-cloud"></i> Word Cloud
+    </button>
   </div>
+  <div class="col-6">
+    <button class="btn btn-secondary btn-block" type="button" onclick="{location.reload()}">
+      <i class="fas fa-random"></i> Re-Sample
+    </button>
+  </div>
+  <div class="col-12">
+    <div class="collapse show" id="collapseExample">
+      <div id="wordcloud"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row">
   <div class="col-12">
   {% for l in labels %}
     <h5>
@@ -74,9 +91,10 @@
               <td>{{p.comment}}</td>
             </tr>
           </table>
+          <a class="btn btn-info" href="{% url 'ra:photo_edit' id=p.id%}">Edit</a>
         </div>
         <div class="modal-footer">
-          {{p.datetime|date}}
+          <p>{{p.path}} on {{p.datetime|date}}</p>
         </div>
       </div>
     </div>
@@ -93,8 +111,14 @@
 <script>
 var TARGET_ELEMENT_ID = '#wordcloud'; // 描画先
 {#d3.json(DATA_FILE_PATH).then(function(data) { // v5#}
-var h = 300;
-var w = 1200;
+if (window.innerWidth > 768) {
+  var h = 400;
+  var w = 1200;
+}else{
+  var h = 400;
+  var w = 400;
+}
+
 var data_list = [
   {% for td in wordcloud_list %}
   {
