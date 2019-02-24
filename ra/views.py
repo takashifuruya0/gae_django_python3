@@ -3,6 +3,7 @@ from django.shortcuts import HttpResponse, Http404, redirect
 # from google.cloud import datastore
 from datetime import datetime
 import logging
+logger = logging.getLogger('django')
 from ra.functions import f_datastore
 from ra.form import FmanageForm, TrainingForm, PhotoForm
 from django.contrib import messages
@@ -37,7 +38,7 @@ def main(request):
             messages.success(request, "Saved")
         else:
             messages.error(request, "Failed")
-            logging.error("Failed")
+            logger.error("Failed")
         return redirect("ra:main")
 
 
@@ -80,7 +81,7 @@ def training(request):
             messages.success(request, "Saved")
         else:
             messages.error(request, "Failed")
-            logging.error("Failed")
+            logger.error("Failed")
         return redirect('ra:training')
     elif request.method == "GET":
         # GETパラメータ
@@ -126,40 +127,59 @@ def photo(request):
             photo = f_datastore.Photo().get_list()
     # wordcloud
     wordcloud_list = list()
-    prefecture_list = {
-        f['prefecture']: {
-            "word": f['prefecture'],
-            "count": 0,
-            "url": "?prefecture={}".format(f['prefecture'])
-        } for f in f_datastore.Photo().distinct("prefecture").get_list()
-    }
-    country_list = {
-        f['country']: {
-            "word": f['country'],
-            "count": 0,
-            "url": "?country={}".format(f['country'])
-        } for f in f_datastore.Photo().distinct("country").get_list()
-    }
-    sitename_list = {
-        f['sitename']: {
-            "word": f['sitename'],
-            "count": 0,
-            "url": "?sitename={}".format(f['sitename'])
-        } for f in f_datastore.Photo().distinct("sitename").get_list()
-    }
+
+    propery_list = dict()
+    for tp in target_properties:
+        propery_list[tp] = {
+            f[tp]: {
+                "word": f[tp],
+                "count": 0,
+                "url": "?{0}={1}".format(tp, f[tp])
+            } for f in f_datastore.Photo().distinct(tp).get_list()
+        }
     for p in photo:
-        prefecture_list[p['prefecture']]['count'] += 1
-        country_list[p['country']]['count'] += 1
-        sitename_list[p['sitename']]['count'] += 1
-    for pl in prefecture_list.values():
-        if pl['count'] > 0 and not pl['word'] in (l['val'] for l in labels):
-            wordcloud_list.append(pl)
-    for cl in country_list.values():
-        if cl['count'] > 0 and not cl['word'] in (l['val'] for l in labels):
-            wordcloud_list.append(cl)
-    for sl in sitename_list.values():
-        if sl['count'] > 0 and not sl['word'] in (l['val'] for l in labels):
-            wordcloud_list.append(sl)
+        for tp in target_properties:
+            propery_list[tp][p[tp]]['count'] += 1
+    label_check = (l['val'] for l in labels)
+    for pls in propery_list.values():
+        for pl in pls.values():
+            if pl['count'] > 0 and not pl['word'] in label_check:
+                wordcloud_list.append(pl)
+
+    # prefecture_list = {
+    #     f['prefecture']: {
+    #         "word": f['prefecture'],
+    #         "count": 0,
+    #         "url": "?prefecture={}".format(f['prefecture'])
+    #     } for f in f_datastore.Photo().distinct("prefecture").get_list()
+    # }
+    # country_list = {
+    #     f['country']: {
+    #         "word": f['country'],
+    #         "count": 0,
+    #         "url": "?country={}".format(f['country'])
+    #     } for f in f_datastore.Photo().distinct("country").get_list()
+    # }
+    # sitename_list = {
+    #     f['sitename']: {
+    #         "word": f['sitename'],
+    #         "count": 0,
+    #         "url": "?sitename={}".format(f['sitename'])
+    #     } for f in f_datastore.Photo().distinct("sitename").get_list()
+    # }
+    # for p in photo:
+    #     prefecture_list[p['prefecture']]['count'] += 1
+    #     country_list[p['country']]['count'] += 1
+    #     sitename_list[p['sitename']]['count'] += 1
+    # for pl in prefecture_list.values():
+    #     if pl['count'] > 0 and not pl['word'] in (l['val'] for l in labels):
+    #         wordcloud_list.append(pl)
+    # for cl in country_list.values():
+    #     if cl['count'] > 0 and not cl['word'] in (l['val'] for l in labels):
+    #         wordcloud_list.append(cl)
+    # for sl in sitename_list.values():
+    #     if sl['count'] > 0 and not sl['word'] in (l['val'] for l in labels):
+    #         wordcloud_list.append(sl)
     # output
     photo = random.sample(photo, 20) if len(photo) > 20 else photo
     output = {
