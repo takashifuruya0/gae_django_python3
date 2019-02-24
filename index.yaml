@@ -5,3 +5,11 @@ indexes:
   - name: name
   - name: datetime
     direction: desc
+
+- kind: Photo
+  properties:
+  - name: sitename
+  - name: prefecture
+  - name: country
+  - name: datetime
+    direction: desc

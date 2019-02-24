@@ -112,7 +112,8 @@ def training(request):
 
 def photo(request):
     labels = list()
-    for f in ("prefecture", "country", "sitename"):
+    target_properties = ("prefecture", "country", "sitename")
+    for f in target_properties:
         param = request.GET.get(f, None)
         if param:
             labels.append({
