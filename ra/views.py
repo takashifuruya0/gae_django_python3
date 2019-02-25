@@ -49,6 +49,13 @@ def ajax(request):
         data = {
             'your_surprise_txt': "The number of training: {}".format(f_datastore.Training().get_list().__len__()),
         }
+        data = [
+            {
+                "word": "a_{}".format(i),
+                "count": i,
+                "url": "/",
+            } for i in range(10)
+        ]
         response = json.dumps(data)  # JSON形式に直して・・
         return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・・
     else:
