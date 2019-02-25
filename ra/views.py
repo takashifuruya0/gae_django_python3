@@ -126,8 +126,8 @@ def photo(request):
         else:
             photo = f_datastore.Photo().get_list()
     # wordcloud
+    label_check = (l['val'] for l in labels)
     wordcloud_list = list()
-
     propery_list = dict()
     for tp in target_properties:
         propery_list[tp] = {
@@ -140,7 +140,6 @@ def photo(request):
     for p in photo:
         for tp in target_properties:
             propery_list[tp][p[tp]]['count'] += 1
-    label_check = (l['val'] for l in labels)
     for pls in propery_list.values():
         for pl in pls.values():
             if pl['count'] > 0 and not pl['word'] in label_check:

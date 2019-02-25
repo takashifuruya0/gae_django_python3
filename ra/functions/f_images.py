@@ -13,6 +13,9 @@ def resize_images():
         print(t)
         # resize
         img = Image.open("static/image/{}".format(t))
+        # width_rev = 1200
+        # height_rev = img.width * img.height / width_rev
+        # img_resize = img.resize((int(width_rev), int(height_rev)))
         img_resize = img.resize((int(img.width / 3), int(img.height / 3)))
         img_resize.save("static/image/resized/{}".format(t))
         # update datastore

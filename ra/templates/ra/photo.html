@@ -16,7 +16,9 @@
   </div>
   <div class="col-12">
     <div class="collapse show" id="collapseExample">
-      <div id="wordcloud"></div>
+      <div class="card">
+        <div id="wordcloud"></div>
+      </div>
     </div>
   </div>
 
@@ -72,7 +74,7 @@
         </div>
 
         <div class="modal-body">
-          <img src="{%static p.path %}" width="100%">
+          <img src="{%static p.path_resized %}" width="100%">
           <table class="table">
             <tr>
               <td>
@@ -129,7 +131,7 @@ var data_list = [
 {% endfor %}
 ]
 data = data_list
-var random = d3.randomIrwinHall(2);
+var random = d3.randomIrwinHall(2); // アーウィンホール分布
 var countMax = d3.max(data, function(d){ return d.count} );
 var sizeScale = d3.scaleLinear().domain([0, countMax]).range([10, 100])
 
