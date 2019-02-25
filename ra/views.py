@@ -9,9 +9,11 @@ from ra.form import FmanageForm, TrainingForm, PhotoForm
 from django.contrib import messages
 import json
 import random
+from ra.functions import access_time
 
 
 # Create your views here.
+@access_time.measure
 def main(request):
     if request.method == "GET":
         form = FmanageForm(initial={"datetime": datetime.today()})
@@ -53,6 +55,7 @@ def ajax(request):
         raise Http404  # GETリクエストを404扱いにしているが、実際は別にしなくてもいいかも
 
 
+@access_time.measure
 def wordcloud(request):
     testdata = [
         {"word": "イノシシ", "count": 9, "url": "/photo/"},
@@ -65,6 +68,7 @@ def wordcloud(request):
     return TemplateResponse(request, 'ra/wordcloud.html', {'testdata': testdata})
 
 
+@access_time.measure
 def training(request):
     if request.method == "POST":
         form = TrainingForm(request.POST)
@@ -112,6 +116,7 @@ def training(request):
         return TemplateResponse(request, "ra/training.html", output)
 
 
+@access_time.measure
 def photo(request):
     labels = list()
     target_properties = ("prefecture", "country", "sitename")
@@ -145,42 +150,7 @@ def photo(request):
         for pl in pls.values():
             if pl['count'] > 0 and not pl['word'] in label_check:
                 wordcloud_list.append(pl)
-
-    # prefecture_list = {
-    #     f['prefecture']: {
-    #         "word": f['prefecture'],
-    #         "count": 0,
-    #         "url": "?prefecture={}".format(f['prefecture'])
-    #     } for f in f_datastore.Photo().distinct("prefecture").get_list()
-    # }
-    # country_list = {
-    #     f['country']: {
-    #         "word": f['country'],
-    #         "count": 0,
-    #         "url": "?country={}".format(f['country'])
-    #     } for f in f_datastore.Photo().distinct("country").get_list()
-    # }
-    # sitename_list = {
-    #     f['sitename']: {
-    #         "word": f['sitename'],
-    #         "count": 0,
-    #         "url": "?sitename={}".format(f['sitename'])
-    #     } for f in f_datastore.Photo().distinct("sitename").get_list()
-    # }
-    # for p in photo:
-    #     prefecture_list[p['prefecture']]['count'] += 1
-    #     country_list[p['country']]['count'] += 1
-    #     sitename_list[p['sitename']]['count'] += 1
-    # for pl in prefecture_list.values():
-    #     if pl['count'] > 0 and not pl['word'] in (l['val'] for l in labels):
-    #         wordcloud_list.append(pl)
-    # for cl in country_list.values():
-    #     if cl['count'] > 0 and not cl['word'] in (l['val'] for l in labels):
-    #         wordcloud_list.append(cl)
-    # for sl in sitename_list.values():
-    #     if sl['count'] > 0 and not sl['word'] in (l['val'] for l in labels):
-    #         wordcloud_list.append(sl)
-    # output
+    # sampling
     photo = random.sample(photo, 20) if len(photo) > 20 else photo
     output = {
         "photo": photo,
@@ -193,6 +163,7 @@ def photo(request):
     return TemplateResponse(request, "ra/photo.html", output)
 
 
+@access_time.measure
 def photo_edit(request, id):
     photo = f_datastore.Photo().get_entity_by_id(id)
     if request.method == "GET":
