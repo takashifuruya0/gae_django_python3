@@ -108,6 +108,7 @@ def training(request):
             "name_chart": name_chart,
             "length_chart": res.__len__(),
         }
+        logger.info(output)
         return TemplateResponse(request, "ra/training.html", output)
 
 
@@ -188,8 +189,7 @@ def photo(request):
         "today": datetime.today(),
         "wordcloud_list": wordcloud_list,
     }
-    for w in wordcloud_list:
-        print(w)
+    logger.info(output)
     return TemplateResponse(request, "ra/photo.html", output)
 
 
@@ -204,6 +204,7 @@ def photo_edit(request, id):
             "form": form,
             "path": initial['path']
         }
+        logger.info(output)
         return TemplateResponse(request, 'ra/photo_edit.html', output)
     elif request.method == "POST":
         form = PhotoForm(request.POST)
@@ -213,4 +214,5 @@ def photo_edit(request, id):
             photo.entity[i] = post_data.get(i)
         photo.update()
         messages.success(request, "{} was updated".format(photo.entity.id))
+        logger.info("{} was updated".format(photo.entity.id))
         return redirect('ra:photo')
