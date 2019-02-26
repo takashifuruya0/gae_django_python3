@@ -9,18 +9,18 @@ def resize_images():
     done_resizing = os.listdir('static/image/resized')
     target.remove("resized")
     for t in target:
-        # if not t in done_resizing:
-        print(t)
         # resize
         img = Image.open("static/image/{}".format(t))
-        # width_rev = 1200
-        # height_rev = img.width * img.height / width_rev
-        # img_resize = img.resize((int(width_rev), int(height_rev)))
-        img_resize = img.resize((int(img.width / 3), int(img.height / 3)))
-        img_resize.save("static/image/resized/{}".format(t))
-        # update datastore
         photo = f_datastore.Photo().filter("path", "=", "image/{}".format(t)).get_entity()
-        photo.entity['path_resized'] = "image/resized/{}".format(t)
+        resize_sizes = (1200, 480)
+        for width_rev in resize_sizes:
+            height_rev = img.height * width_rev / img.width
+            img_resize = img.resize((int(width_rev), int(height_rev)))
+            img_resize.save("static/resized_{0}/{1}".format(width_rev, t))
+            photo.entity['path_resized_{}'.format(width_rev)] = "resized_{0}/{1}".format(width_rev, t)
+        # img_resize = img.resize((int(img.width / 3), int(img.height / 3)))
+        # update datastore
+        # photo.entity['path_resized'] = "image/resized/{}".format(t)
         photo.entity['datetime'] = get_datetime(img)
         photo.update()
     return True

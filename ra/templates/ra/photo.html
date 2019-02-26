@@ -47,8 +47,8 @@
   <div class="col-6 col-md-4 col-lg-3">
     <div class="card">
       <img class="card-img-top"
-           {% if p.path_resized %}
-           src="{%static p.path_resized %}"
+           {% if p.path_resized_480 %}
+           src="{%static p.path_resized_480 %}"
            {% else %}
            src="{%static p.path %}"
            {% endif %}
@@ -76,7 +76,7 @@
         </div>
 
         <div class="modal-body">
-          <img src="{%static p.path_resized %}" width="100%">
+          <img src="{%static p.path_resized_1200 %}" width="100%">
           <table class="table">
             <tr>
               <td>
@@ -206,7 +206,7 @@ function draw_wc(data){
                   .attr("class", "card")
                 .append('img')
                   .attr("class", "card-img-top")
-                  .attr("src", "/static/"+sample.path_resized)
+                  .attr("src", "/static/"+sample.path_resized_480)
                   .attr("width", "100%")
                   .attr("data-toggle", "modal")
                   .attr("data-target", "#"+sample.id)
@@ -232,7 +232,7 @@ function draw_wc(data){
                 )
               var body = modal.append("div")
                 .attr("class", "modal-body")
-                .html("<img src=/static/"+sample.path_resized+" width=100%>")
+                .html("<img src=/static/"+sample.path_resized_1200+" width=100%>")
               var table = body.append("table").attr("class", "table")
               var tr1 = table.append("tr")
               tr1.append("td").append("h5").html(
