@@ -46,20 +46,54 @@ def main(request):
 
 def ajax(request):
     if request.method in ('POST', "GET"):
-        data = {
-            'your_surprise_txt': "The number of training: {}".format(f_datastore.Training().get_list().__len__()),
+        # data = {
+        #     'your_surprise_txt': "The number of training: {}".format(f_datastore.Training().get_list().__len__()),
+        # }
+        target_properties = ("prefecture", "country", "sitename")
+        # GET
+        prop = request.GET.get('prop')
+        text = request.GET.get('text')
+        logger.info("ajax:parameter prop={} text={}".format(prop, text))
+        # Word Cloud
+        photo = f_datastore.Photo().filter(prop, "=", text).get_list()
+        wordcloud_list = list()
+        propery_list = dict()
+        label_check = [{"key": prop, "val": text}, ]
+        for tp in target_properties:
+            propery_list[tp] = {
+                f[tp]: {
+                    "word": f[tp],
+                    "property": tp,
+                    "count": 0,
+                    "url": "?{0}={1}".format(tp, f[tp])
+                } for f in f_datastore.Photo().distinct(tp).get_list()
+            }
+        for p in photo:
+            for tp in target_properties:
+                propery_list[tp][p[tp]]['count'] += 1
+        for pls in propery_list.values():
+            for key, pl in pls.items():
+                check = {
+                    "key": pl["property"],
+                    "val": pl['word']
+                }
+                if pl['count'] > 0 and not check in label_check:
+                    wordcloud_list.append(pl)
+        samples = list()
+        for p in photo:
+            sample = {"id": p.id}
+            for k, v in p.items():
+                val = v.__str__() if k == "datetime" else v
+                sample[k] = val
+            samples.append(sample)
+        res_data = {
+            "wordcloud_list": wordcloud_list,
+            "samples": samples,
         }
-        data = [
-            {
-                "word": "a_{}".format(i),
-                "count": i,
-                "url": "/",
-            } for i in range(10)
-        ]
-        response = json.dumps(data)  # JSON形式に直して・・
+        response = json.dumps(res_data)  # JSON形式に直して・・
         return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・・
     else:
-        raise Http404  # GETリクエストを404扱いにしているが、実際は別にしなくてもいいかも
+        raise Http404
 
 
 @access_time.measure
@@ -146,6 +180,7 @@ def photo(request):
         propery_list[tp] = {
             f[tp]: {
                 "word": f[tp],
+                "property": tp,
                 "count": 0,
                 "url": "?{0}={1}".format(tp, f[tp])
             } for f in f_datastore.Photo().distinct(tp).get_list()
@@ -155,7 +190,11 @@ def photo(request):
             propery_list[tp][p[tp]]['count'] += 1
     for pls in propery_list.values():
         for pl in pls.values():
-            if pl['count'] > 0 and not pl['word'] in label_check:
+            check = {
+                "key": pl["property"],
+                "val": pl['word']
+            }
+            if pl['count'] > 0 and not check in label_check:
                 wordcloud_list.append(pl)
     # sampling
     photo = random.sample(photo, 20) if len(photo) > 20 else photo

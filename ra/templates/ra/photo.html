@@ -42,7 +42,7 @@
 </div>
 <hr>
 
-<div class="row">
+<div class="row" id="photo-cards">
   {% for p in photo %}
   <div class="col-6 col-md-4 col-lg-3">
     <div class="card">
@@ -58,7 +58,7 @@
       >
     </div>
   </div>
-  <hr>
+
   {% endfor %}
 
   {% for p in photo %}
@@ -134,6 +134,7 @@ var data_list = [
     "word": "{{td.word}}",
     "count": {{td.count}},
     "url": "{{td.url}}",
+    "property": "{{td.property}}",
   },
 {% endfor %}
 ]
@@ -146,6 +147,7 @@ function draw_wc(data){
     return {
     url: d.url,
     text: d.word,
+    property: d.property,
     size: sizeScale(d.count) //頻出カウントを文字サイズに反映
     };
   });
@@ -179,19 +181,75 @@ function draw_wc(data){
         })
         .text(function(d) { return d.text; })
         .on("click", function (d, i){
-          window.location.href = d.url;
           // ajax
-          <!--$.ajax({-->
-            <!--url: "{% url 'ra:ajax' %}",-->
-            <!--method: "GET",-->
-            <!--data: "",-->
-            <!--timeout: 10000,-->
-            <!--dataType: "json",-->
-          <!--})-->
-          <!--.done(function(data_ajax) {-->
-            <!--d3.select(TARGET_ELEMENT_ID).select('svg').remove();-->
-            <!--draw_wc(data_ajax);-->
-          <!--})-->
+          $.ajax({
+            url: "{% url 'ra:ajax' %}",
+            method: "GET",
+            data: {
+              text: d.text,
+              prop: d.property,
+            },
+            timeout: 10000,
+            dataType: "json",
+          })
+          .done(function(data_ajax) {
+            d3.select(TARGET_ELEMENT_ID).select('svg').remove();
+            draw_wc(data_ajax.wordcloud_list);
+            cards = d3.select('#photo-cards')
+            cards.selectAll('div').remove()
+            for (sample of data_ajax.samples){  // 配列のfor文はof
+              // 写真
+              cards
+                .append('div')
+                  .attr("class", "col-6 col-md-4 col-lg-3") // style using semantic ui
+                .append('div')
+                  .attr("class", "card")
+                .append('img')
+                  .attr("class", "card-img-top")
+                  .attr("src", "/static/"+sample.path_resized)
+                  .attr("width", "100%")
+                  .attr("data-toggle", "modal")
+                  .attr("data-target", "#"+sample.id)
+              // modal
+              var modal = cards
+                .append("div")
+                  .attr("class", "modal fade")
+                  .attr("id", sample.id)
+                  .attr("tabindex", "-1")
+                  .attr("role", "dialog")
+                  .attr("aria-labelledby", "order")
+                  .attr("aria-hidden", "true")
+                .append("div")
+                  .attr("class", "modal-dialog modal-lg")
+                  .attr("role", "document")
+                .append("div")
+                  .attr("class", "modal-content")
+
+              var header = modal.append("div")
+                .attr("class", "modal-header")
+                .html(
+                  '<h4 class="modal-title">'+sample.sitename+'</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+                )
+              var body = modal.append("div")
+                .attr("class", "modal-body")
+                .html("<img src=/static/"+sample.path_resized+" width=100%>")
+              var table = body.append("table").attr("class", "table")
+              var tr1 = table.append("tr")
+              tr1.append("td").append("h5").html(
+                'Country: <a class="badge bg-warning" href="?country='+sample.country+'">'+sample.country+'</a>'
+              )
+              tr1.append("td").append("h5").html(
+                'Prefecture: <a class="badge bg-warning" href="?prefecture='+sample.prefecture+'">'+sample.prefecture+'</a>'
+              )
+              var tr2 = table.append("tr")
+              tr2.append("th").text("Comment")
+              tr2.append("td").text(sample.comment)
+              var footer = modal.append("div")
+                .attr("class", "modal-footer")
+                .append('p')
+                  .attr("OK")
+            }
+          })
         });
   }
 }
