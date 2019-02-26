@@ -83,7 +83,7 @@ def ajax(request):
         for p in photo:
             sample = {"id": p.id}
             for k, v in p.items():
-                val = v.__str__() if k == "datetime" else v
+                val = v.__str__() if k in ("datetime", "location") else v
                 sample[k] = val
             samples.append(sample)
         res_data = {
