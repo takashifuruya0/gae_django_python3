@@ -81,7 +81,7 @@ DATABASES = {
         'NAME': "gaebase",
         "USER": 'gaeuser',
         "PASSWORD": 'Takashi&102',
-        'HOST': "35.243.141.45",
+        'HOST': "34.73.73.184",
         "PORT": "5432",
         "ATOMIC_REQUESTS": True,
     }
