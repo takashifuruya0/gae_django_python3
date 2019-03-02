@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{% block title %}{% endblock %}</title>
+    <!-- favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{%static 'favicon/favicon-camera.ico'%}">
     <!-- Bootstrap CSS CDN -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
     <!-- Our Custom CSS -->
@@ -22,7 +24,6 @@
     <!-- axios -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
-
 </head>
 
 <body>
@@ -31,63 +32,65 @@
         <!-- Sidebar  -->
         <nav id="sidebar">
             <div class="sidebar-header">
-                <a href="{% url 'ra:main' %}">
-                  <h3>FK-Manage</h3>
+                <a href="{% url 'ra:photo' %}">
+                  <h3><i class="fas fa-camera-retro"></i> FK-Manage</h3>
                 </a>
-                <a href="{% url 'ra:main' %}">
-                  <strong>FK</strong>
+                <a href="{% url 'ra:photo' %}">
+                  <strong><i class="fas fa-camera-retro"></i></strong>
                 </a>
             </div>
 
             <ul class="list-unstyled components">
+
+                {% if property_list %}
                 <li>
-                    <a href="#kakeiboSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                        <i class="fas fa-home"></i>
-                        Kakeibo
+                    <a href="#countrySubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                        <i class="fas fa-globe"></i> Country
                     </a>
-                    <ul class="collapse list-unstyled" id="kakeiboSubmenu">
+                    <ul class="collapse list-unstyled" id="countrySubmenu">
+                        {% for plc in property_list.country.values %}
                         <li>
-                            <a href="#">Home 1</a>
+                            <a href="{% url 'ra:photo' %}{{plc.url_param}}">{{plc.word}}</a>
                         </li>
-                        <li>
-                            <a href="#">Home 2</a>
-                        </li>
-                        <li>
-                            <a href="#">Home 3</a>
-                        </li>
+                        {% endfor %}
                     </ul>
                 </li>
                 <li>
-                    <a href="{% url 'ra:photo' %}">
-                        <i class="fas fa-camera-retro"></i> Photo
+                    <a href="#prefectureSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                        <i class="fas fa-map-signs"></i> Prefecture
                     </a>
+                    <ul class="collapse list-unstyled" id="prefectureSubmenu">
+                        {% for plc in property_list.prefecture.values %}
+                        <li>
+                            <a href="{% url 'ra:photo' %}{{plc.url_param}}">{{plc.word}}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </li>
                 <li>
-                    <a href="{% url 'ra:training' %}">
-                        <i class="fas fa-dumbbell"></i> Training
+                    <a href="#sitenameSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                        <i class="fas fa-map-marker-alt"></i> Site
                     </a>
+                    <ul class="collapse list-unstyled" id="sitenameSubmenu">
+                        {% for plc in property_list.sitename.values %}
+                        <li>
+                            <a href="{% url 'ra:photo' %}{{plc.url_param}}">{{plc.word}}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </li>
-                <li>
-                    <a href="/admin">
-                        <i class="fas fa-cogs"></i> Admin
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'ra:wordcloud' %}">
-                        <i class="fas fa-cloud"></i> Word Cloud
-                    </a>
-                </li>
+                {% endif %}
+
                 <li>
                     <a href="#">
-                        <i class="fas fa-paper-plane"></i>
-                        Contact
+                        <i class="fas fa-info-circle"></i> About us
                     </a>
                 </li>
             </ul>
 
             <ul class="list-unstyled CTAs">
                 <li>
-                    <a href="#" class="download">Download source</a>
+                    <a href="/admin" class="download"><i class="fas fa-cogs"></i> Admin</a>
                 </li>
             </ul>
         </nav>
@@ -110,26 +113,6 @@
                     </button>
                     {% if title %}<h4>{{title}}</h4>{% endif %}
                     <p>{{ today | date}}</p>
-{#                    <button class="btn btn-dark d-inline-block d-lg-none ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">#}
-{#                        <i class="fas fa-align-justify"></i>#}
-{#                    </button>#}
-{##}
-{#                    <div class="collapse navbar-collapse" id="navbarSupportedContent">#}
-{#                        <ul class="nav navbar-nav ml-auto">#}
-{#                            <li class="nav-item active">#}
-{#                                <a class="nav-link" href="#">Page</a>#}
-{#                            </li>#}
-{#                            <li class="nav-item">#}
-{#                                <a class="nav-link" href="#">Page</a>#}
-{#                            </li>#}
-{#                            <li class="nav-item">#}
-{#                                <a class="nav-link" href="#">Page</a>#}
-{#                            </li>#}
-{#                            <li class="nav-item">#}
-{#                                <a class="nav-link" href="#">Page</a>#}
-{#                            </li>#}
-{#                        </ul>#}
-{#                    </div>#}
                 </div>
             </nav>
 

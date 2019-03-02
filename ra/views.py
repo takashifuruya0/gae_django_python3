@@ -175,9 +175,9 @@ def photo(request):
     # wordcloud
     label_check = (l['val'] for l in labels)
     wordcloud_list = list()
-    propery_list = dict()
+    property_list = dict()
     for tp in target_properties:
-        propery_list[tp] = {
+        property_list[tp] = {
             f[tp]: {
                 "word": f[tp],
                 "property": tp,
@@ -187,8 +187,8 @@ def photo(request):
         }
     for p in photo:
         for tp in target_properties:
-            propery_list[tp][p[tp]]['count'] += 1
-    for pls in propery_list.values():
+            property_list[tp][p[tp]]['count'] += 1
+    for pls in property_list.values():
         for pl in pls.values():
             check = {
                 "key": pl["property"],
@@ -196,14 +196,24 @@ def photo(request):
             }
             if pl['count'] > 0 and not check in label_check:
                 wordcloud_list.append(pl)
+
     # sampling
     photo = random.sample(photo, 20) if len(photo) > 20 else photo
+    # for tp in target_properties:
+    #     property_list[tp] = {
+    #         f[tp]: {
+    #             "word": f[tp],
+    #             "property": tp,
+    #             "url_param": "?{0}={1}".format(tp, f[tp])
+    #         } for f in photo
+    #     }
     output = {
         "photo": photo,
         "labels": labels,
         "title": "Find where you wanna visit !",
         "today": datetime.today(),
         "wordcloud_list": wordcloud_list,
+        "property_list": property_list,
     }
     logger.info(output)
     return TemplateResponse(request, "ra/photo.html", output)
