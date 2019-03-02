@@ -76,7 +76,7 @@ span {
 
 #sidebar.active .sidebar-header h4,
 #sidebar.active .CTAs,
-#sidebar > ul > li > ul > li > a > span {
+#sidebar.active > ul > li > ul > li > a > span {
     display: none;
 }
 
