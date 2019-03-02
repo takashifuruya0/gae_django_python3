@@ -2,8 +2,13 @@
 {% load static %}
 {% block title %}Photo{% endblock %}
 {% block body %}
-<div class="row">
+<div id="overlay" class="hide">
+  <div class="cv-spinner">
+      <span class="spinner"></span>
+  </div>
+</div>
 
+<div class="row">
   <div class="col-6">
     <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
       <i class="fas fa-cloud"></i> Word Cloud
@@ -114,13 +119,12 @@
 {#<script src="{% static 'js/cloud.js'%}"></script>#}
 <script>
 var TARGET_ELEMENT_ID = '#wordcloud'; // 描画先
-{#d3.json(DATA_FILE_PATH).then(function(data) { // v5#}
 if (window.innerWidth > 768) {
   var h = 400;
   var w = 1200;
 }else{
   var h = 400;
-  var w = 400;
+  var w = 500;
 }
 
 function test_h(text){
@@ -138,6 +142,7 @@ var data_list = [
   },
 {% endfor %}
 ]
+
 function draw_wc(data){
   var random = d3.randomIrwinHall(2); // アーウィンホール分布
   var countMax = d3.max(data, function(d){ return d.count} );
@@ -191,6 +196,10 @@ function draw_wc(data){
             },
             timeout: 10000,
             dataType: "json",
+            //リクエストが完了するまで実行される
+            beforeSend: function(){
+              $('#overlay').removeClass('hide');
+            }
           })
           .done(function(data_ajax) {
             d3.select(TARGET_ELEMENT_ID).select('svg').remove();
@@ -249,6 +258,7 @@ function draw_wc(data){
                 .append('p')
                   .attr("OK")
             }
+            $('#overlay').addClass('hide');
           })
         });
   }
