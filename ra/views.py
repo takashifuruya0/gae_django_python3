@@ -14,6 +14,13 @@ from ra.functions import access_time
 
 # Create your views here.
 @access_time.measure
+def top(request):
+    output = {
+        "text": "Hello world"
+    }
+    return TemplateResponse(request, 'ra/top.html', output)
+
+@access_time.measure
 def main(request):
     if request.method == "GET":
         form = FmanageForm(initial={"datetime": datetime.today()})
@@ -97,6 +104,88 @@ def ajax(request):
 
 
 @access_time.measure
+def photo(request):
+    labels = list()
+    target_properties = ("prefecture", "country", "sitename")
+    for f in target_properties:
+        param = request.GET.get(f, None)
+        if param:
+            labels.append({
+                "key": f,
+                "val": param,
+            })
+            photo = f_datastore.Photo().filter(f, "=", param).get_list()
+            break
+        else:
+            photo = f_datastore.Photo().get_list()
+    # wordcloud
+    label_check = (l['val'] for l in labels)
+    wordcloud_list = list()
+    property_list = dict()
+    for tp in target_properties:
+        property_list[tp] = {
+            f[tp]: {
+                "word": f[tp],
+                "property": tp,
+                "count": 0,
+                "url": "?{0}={1}".format(tp, f[tp])
+            } for f in f_datastore.Photo().distinct(tp).get_list()
+        }
+    for p in photo:
+        for tp in target_properties:
+            property_list[tp][p[tp]]['count'] += 1
+    for pls in property_list.values():
+        for pl in pls.values():
+            check = {
+                "key": pl["property"],
+                "val": pl['word']
+            }
+            if pl['count'] > 0 and not check in label_check:
+                wordcloud_list.append(pl)
+
+    # sampling
+    photo = random.sample(photo, 20) if len(photo) > 20 else photo
+
+    output = {
+        "photo": photo,
+        "labels": labels,
+        "title": "Find your favorite place !",
+        "today": datetime.today(),
+        "wordcloud_list": wordcloud_list,
+        "property_list": property_list,
+    }
+    logger.info(output)
+    return TemplateResponse(request, "ra/photo.html", output)
+
+
+@access_time.measure
+def photo_edit(request, id):
+    photo = f_datastore.Photo().get_entity_by_id(id)
+    if request.method == "GET":
+        initial = dict()
+        for k, v in photo.entity.items():
+            initial[k] = v
+        form = PhotoForm(initial=initial)
+        output = {
+            "form": form,
+            "path": initial['path']
+        }
+        logger.info(output)
+        return TemplateResponse(request, 'ra/photo_edit.html', output)
+    elif request.method == "POST":
+        form = PhotoForm(request.POST)
+        form.is_valid()
+        post_data = form.cleaned_data
+        for i in photo.data.keys():
+            photo.entity[i] = post_data.get(i)
+        photo.update()
+        messages.success(request, "{} was updated".format(photo.entity.id))
+        logger.info("{} was updated".format(photo.entity.id))
+        return redirect('ra:photo')
+
+
+# ============================================================
+@access_time.measure
 def wordcloud(request):
     testdata = [
         {"word": "イノシシ", "count": 9, "url": "/photo/"},
@@ -155,91 +244,3 @@ def training(request):
         }
         logger.info(output)
         return TemplateResponse(request, "ra/training.html", output)
-
-
-@access_time.measure
-def photo(request):
-    labels = list()
-    target_properties = ("prefecture", "country", "sitename")
-    for f in target_properties:
-        param = request.GET.get(f, None)
-        if param:
-            labels.append({
-                "key": f,
-                "val": param,
-            })
-            photo = f_datastore.Photo().filter(f, "=", param).get_list()
-            break
-        else:
-            photo = f_datastore.Photo().get_list()
-    # wordcloud
-    label_check = (l['val'] for l in labels)
-    wordcloud_list = list()
-    property_list = dict()
-    for tp in target_properties:
-        property_list[tp] = {
-            f[tp]: {
-                "word": f[tp],
-                "property": tp,
-                "count": 0,
-                "url": "?{0}={1}".format(tp, f[tp])
-            } for f in f_datastore.Photo().distinct(tp).get_list()
-        }
-    for p in photo:
-        for tp in target_properties:
-            property_list[tp][p[tp]]['count'] += 1
-    for pls in property_list.values():
-        for pl in pls.values():
-            check = {
-                "key": pl["property"],
-                "val": pl['word']
-            }
-            if pl['count'] > 0 and not check in label_check:
-                wordcloud_list.append(pl)
-
-    # sampling
-    photo = random.sample(photo, 20) if len(photo) > 20 else photo
-    # for tp in target_properties:
-    #     property_list[tp] = {
-    #         f[tp]: {
-    #             "word": f[tp],
-    #             "property": tp,
-    #             "url_param": "?{0}={1}".format(tp, f[tp])
-    #         } for f in photo
-    #     }
-    output = {
-        "photo": photo,
-        "labels": labels,
-        "title": "Find where you wanna visit !",
-        "today": datetime.today(),
-        "wordcloud_list": wordcloud_list,
-        "property_list": property_list,
-    }
-    logger.info(output)
-    return TemplateResponse(request, "ra/photo.html", output)
-
-
-@access_time.measure
-def photo_edit(request, id):
-    photo = f_datastore.Photo().get_entity_by_id(id)
-    if request.method == "GET":
-        initial = dict()
-        for k, v in photo.entity.items():
-            initial[k] = v
-        form = PhotoForm(initial=initial)
-        output = {
-            "form": form,
-            "path": initial['path']
-        }
-        logger.info(output)
-        return TemplateResponse(request, 'ra/photo_edit.html', output)
-    elif request.method == "POST":
-        form = PhotoForm(request.POST)
-        form.is_valid()
-        post_data = form.cleaned_data
-        for i in photo.data.keys():
-            photo.entity[i] = post_data.get(i)
-        photo.update()
-        messages.success(request, "{} was updated".format(photo.entity.id))
-        logger.info("{} was updated".format(photo.entity.id))
-        return redirect('ra:photo')

@@ -34,10 +34,10 @@
         <nav id="sidebar">
             <div class="sidebar-header">
                 <a href="{% url 'ra:photo' %}">
-                  <h3><i class="fas fa-camera-retro"></i> FK-Manage</h3>
+                  <h4><i class="fas fa-camera-retro"></i> Where to Visit?</h4>
                 </a>
                 <a href="{% url 'ra:photo' %}">
-                  <strong><i class="fas fa-camera-retro"></i></strong>
+                  <strong>WV</strong>
                 </a>
             </div>
 
@@ -51,7 +51,9 @@
                     <ul class="collapse list-unstyled" id="countrySubmenu">
                         {% for plc in property_list.country.values %}
                         <li>
-                            <a href="{% url 'ra:photo' %}{{plc.url_param}}">{{plc.word}}</a>
+                            <a href="{% url 'ra:photo' %}{{plc.url}}">
+                                <span class="badge bg-light" style="color:black;">{{plc.count}}</span> {{plc.word}}
+                            </a>
                         </li>
                         {% endfor %}
                     </ul>
@@ -63,7 +65,9 @@
                     <ul class="collapse list-unstyled" id="prefectureSubmenu">
                         {% for plc in property_list.prefecture.values %}
                         <li>
-                            <a href="{% url 'ra:photo' %}{{plc.url_param}}">{{plc.word}}</a>
+                            <a href="{% url 'ra:photo' %}{{plc.url}}">
+                                <span class="bg-sidebar badge bg-light" style="color:black;">{{plc.count}}</span> {{plc.word}}
+                            </a>
                         </li>
                         {% endfor %}
                     </ul>
@@ -75,7 +79,9 @@
                     <ul class="collapse list-unstyled" id="sitenameSubmenu">
                         {% for plc in property_list.sitename.values %}
                         <li>
-                            <a href="{% url 'ra:photo' %}{{plc.url_param}}">{{plc.word}}</a>
+                            <a href="{% url 'ra:photo' %}{{plc.url}}">
+                                <span class="badge bg-light" style="color:black;">{{plc.count}}</span> {{plc.word}}
+                            </a>
                         </li>
                         {% endfor %}
                     </ul>
@@ -83,7 +89,7 @@
                 {% endif %}
 
                 <li>
-                    <a href="#">
+                    <a href="{%url 'ra:main'%}">
                         <i class="fas fa-info-circle"></i> About us
                     </a>
                 </li>

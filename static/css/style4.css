@@ -74,8 +74,9 @@ span {
     text-align: center;
 }
 
-#sidebar.active .sidebar-header h3,
-#sidebar.active .CTAs {
+#sidebar.active .sidebar-header h4,
+#sidebar.active .CTAs,
+#sidebar > ul > li > ul > li > a > span {
     display: none;
 }
 
@@ -223,8 +224,9 @@ a.article:hover {
     #sidebar.active {
         margin-left: 0 !important;
     }
-    #sidebar .sidebar-header h3,
-    #sidebar .CTAs {
+    #sidebar .sidebar-header h4,
+    #sidebar .CTAs,
+    #sidebar > ul > li > ul > li > a > span{
         display: none;
     }
     #sidebar .sidebar-header strong {
