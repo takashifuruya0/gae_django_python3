@@ -42,17 +42,15 @@
             </div>
 
             <ul class="list-unstyled components">
-                {% for l in labels %}
                 <li>
                   <a href="">
                       <i class="fas fa-tag"></i> Tags:
                       <span class="badge badge-warning bg-sm">
-                        {{l.val}}
+                        <span class="ajax_label">{{label}}</span>
                       </span>
                   </a>
                 </li>
                 <hr>
-                {% endfor %}
 
                 {% if property_list %}
                 <li>

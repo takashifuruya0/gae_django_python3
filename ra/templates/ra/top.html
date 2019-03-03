@@ -34,7 +34,13 @@
     <div class="top-wrapper">
         <style>
         .top-wrapper {
-            background-image : url({%static bg_photo.path %});
+            background-image : url(
+            {% if bg_photo.path_resized %}
+            {% static bg_photo.path_resized %}
+            {% else %}
+            {% static bg_photo.path %}
+            {% endif %}
+            );
             background-size: cover;
         }
         </style>

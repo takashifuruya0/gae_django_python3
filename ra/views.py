@@ -78,6 +78,7 @@ def ajax(request):
         res_data = {
             "wordcloud_list": wordcloud_list,
             "samples": samples,
+            "label": labels[0]['val'],
         }
         response = json.dumps(res_data)  # JSON形式に直して・・
         return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・・
@@ -136,7 +137,7 @@ def photo(request):
         property_list[tp].sort(key=lambda x: x['count'], reverse=True)
     output = {
         "photo": photo,
-        "labels": labels,
+        "label": labels[0]['val'] if labels else "",
         "title": "Where to Visit ?",
         "today": datetime.today(),
         "wordcloud_list": wordcloud_list,
