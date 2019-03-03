@@ -2,19 +2,9 @@
 {% load static %}
 {% block title %}Photo{% endblock %}
 {% block body %}
-<div id="overlay" class="hide">
-  <div class="cv-spinner">
-      <span class="spinner"></span>
-  </div>
-</div>
 
 <div class="row">
-  <div class="col-6 col-sm-4">
-    <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-      <i class="fas fa-cloud"></i> <span>Word Cloud</span>
-    </button>
-  </div>
-  <div class="col-6 col-sm-4">
+  <div class="col-12 col-sm-4">
     <button class="btn btn-warning btn-block">
       <i class="fas fa-tag"></i> Tags:
       <span class="badge badge-light">
@@ -22,7 +12,12 @@
       </span>
     </button>
   </div>
-  <div class="col-12 col-sm-4">
+  <div class="col-6 col-sm-4">
+    <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+      <i class="fas fa-cloud"></i> <span>Word Cloud</span>
+    </button>
+  </div>
+  <div class="col-6 col-sm-4">
     <button class="btn btn-secondary btn-block" type="button" onclick="{location.reload()}">
       <i class="fas fa-random"></i> <span>Re-Sample</span>
     </button>

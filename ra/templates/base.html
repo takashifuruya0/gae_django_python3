@@ -42,6 +42,7 @@
     <div class="wrapper">
         <!-- Sidebar  -->
         <nav id="sidebar">
+            <!--Sidebar header-->
             <div class="sidebar-header">
                 <a href="{% url 'ra:photo' %}">
                   <h4><i class="fas fa-camera-retro"></i> Where to Visit?</h4>
@@ -50,15 +51,12 @@
                   <strong>WV</strong>
                 </a>
             </div>
-
+            <!--Sidebar list-->
             <ul class="list-unstyled components">
                 <li>
-                  <a href="">
-                      <i class="fas fa-tag"></i> Tags:
-                      <span class="badge badge-warning bg-sm">
-                        <span class="ajax_label">{{label}}</span>
-                      </span>
-                  </a>
+                    <a href="{%url 'ra:main'%}">
+                        <i class="fas fa-info-circle"></i> About
+                    </a>
                 </li>
                 <hr>
 
@@ -113,15 +111,21 @@
                 </li>
                 {% endif %}
             </ul>
-
-            <ul class="list-unstyled CTAs">
-                <li>
-                    <a href="{%url 'ra:main'%}" class="download">
-                        <i class="fas fa-info-circle"></i> About <strong>Where to Visit?</strong>
-                    </a>
-                </li>
-            </ul>
+            <!--<ul class="list-unstyled CTAs">-->
+                <!--<li>-->
+                    <!--<a href="{%url 'ra:main'%}" class="download">-->
+                        <!--<i class="fas fa-info-circle"></i> About <strong>Where to Visit?</strong>-->
+                    <!--</a>-->
+                <!--</li>-->
+            <!--</ul>-->
         </nav>
+
+        <!--Spinner-->
+        <div id="overlay" class="hide">
+          <div class="cv-spinner">
+              <span class="spinner"></span>
+          </div>
+        </div>
 
         <!-- Page Content  -->
         <div id="content">
