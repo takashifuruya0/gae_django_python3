@@ -1,7 +1,7 @@
 from django.template.response import TemplateResponse
 from django.shortcuts import HttpResponse, Http404, redirect
-# from google.cloud import datastore
 from datetime import datetime
+from django.conf import settings
 import logging
 logger = logging.getLogger('django')
 from ra.functions import f_datastore
@@ -15,59 +15,33 @@ from ra.functions import access_time
 # Create your views here.
 @access_time.measure
 def top(request):
+    photos = f_datastore.Photo().get_list()
+    bg_photo = random.choice(photos)
     output = {
-        "text": "Hello world"
+        "text": "Hello world",
+        "bg_photo": bg_photo,
     }
     return TemplateResponse(request, 'ra/top.html', output)
-
-@access_time.measure
-def main(request):
-    if request.method == "GET":
-        form = FmanageForm(initial={"datetime": datetime.today()})
-        fds = f_datastore.Fds("fmanage")
-        data = fds.order("-datetime").get_list(10)
-        output = {
-            "msg": "Hello world",
-            "data": data,
-            "form": form,
-            "today": datetime.today()
-        }
-        return TemplateResponse(request, 'ra/main.html', output)
-    elif request.method == "POST":
-        form = FmanageForm(request.POST)
-        form.is_valid()
-        post_data = form.cleaned_data
-        fds = f_datastore.Fds("fmanage")
-        fds.data = {
-            "name": post_data.get("name"),
-            "age": post_data.gett("age"),
-            "datetime": post_data.get("datetime"),
-        }
-        if fds.create():
-            messages.success(request, "Saved")
-        else:
-            messages.error(request, "Failed")
-            logger.error("Failed")
-        return redirect("ra:main")
 
 
 def ajax(request):
     if request.method in ('POST', "GET"):
-        # data = {
-        #     'your_surprise_txt': "The number of training: {}".format(f_datastore.Training().get_list().__len__()),
-        # }
         target_properties = ("prefecture", "country", "sitename")
         # GET
-        prop = request.GET.get('prop')
-        text = request.GET.get('text')
-        logger.info("ajax:parameter prop={} text={}".format(prop, text))
+        prop = request.GET.get('prop', None)
+        text = request.GET.get('text', None)
+        labels = [{"key": prop, "val": text}, ]
+        if prop and text and prop in target_properties:
+            photo = f_datastore.Photo().filter(prop, "=", text).get_list()
+            logger.info("ajax:parameter prop={} text={}".format(prop, text))
+        else:
+            photo = f_datastore.Photo().get_list()
+            logger.info("ajax:without parameter")
         # Word Cloud
-        photo = f_datastore.Photo().filter(prop, "=", text).get_list()
         wordcloud_list = list()
-        propery_list = dict()
-        label_check = [{"key": prop, "val": text}, ]
+        property_list = dict()
         for tp in target_properties:
-            propery_list[tp] = {
+            property_list[tp] = {
                 f[tp]: {
                     "word": f[tp],
                     "property": tp,
@@ -77,15 +51,16 @@ def ajax(request):
             }
         for p in photo:
             for tp in target_properties:
-                propery_list[tp][p[tp]]['count'] += 1
-        for pls in propery_list.values():
-            for key, pl in pls.items():
+                property_list[tp][p[tp]]['count'] += 1
+        for pls in property_list.values():
+            for pl in pls.values():
                 check = {
                     "key": pl["property"],
                     "val": pl['word']
                 }
-                if pl['count'] > 0 and not check in label_check:
+                if pl['count'] > 0 and not check in labels:
                     wordcloud_list.append(pl)
+        # datetimeとlocationがJSONに変換できないので、strで送信
         samples = list()
         for p in photo:
             sample = {"id": p.id}
@@ -93,6 +68,13 @@ def ajax(request):
                 val = v.__str__() if k in ("datetime", "location") else v
                 sample[k] = val
             samples.append(sample)
+        # データ数が少ないとwcがうまくいかない→数を増やす
+        while True:
+            if len(wordcloud_list) > 30:
+                break
+            else:
+                wordcloud_list += wordcloud_list
+        # response in JSON
         res_data = {
             "wordcloud_list": wordcloud_list,
             "samples": samples,
@@ -119,7 +101,6 @@ def photo(request):
         else:
             photo = f_datastore.Photo().get_list()
     # wordcloud
-    label_check = (l['val'] for l in labels)
     wordcloud_list = list()
     property_list = dict()
     for tp in target_properties:
@@ -140,49 +121,58 @@ def photo(request):
                 "key": pl["property"],
                 "val": pl['word']
             }
-            if pl['count'] > 0 and not check in label_check:
+            if pl['count'] > 0 and not check in labels:
                 wordcloud_list.append(pl)
 
     # sampling
     photo = random.sample(photo, 20) if len(photo) > 20 else photo
-
+    while True:
+        if len(wordcloud_list) > 30:
+            break
+        else:
+            wordcloud_list += wordcloud_list
+    for tp in target_properties:
+        property_list[tp] = list(property_list[tp].values())
+        property_list[tp].sort(key=lambda x: x['count'], reverse=True)
     output = {
         "photo": photo,
         "labels": labels,
-        "title": "Find your favorite place !",
+        "title": "Where to Visit ?",
         "today": datetime.today(),
         "wordcloud_list": wordcloud_list,
         "property_list": property_list,
+        "environment": settings.ENVIRONMENT,
     }
-    logger.info(output)
     return TemplateResponse(request, "ra/photo.html", output)
 
 
 @access_time.measure
 def photo_edit(request, id):
-    photo = f_datastore.Photo().get_entity_by_id(id)
-    if request.method == "GET":
-        initial = dict()
-        for k, v in photo.entity.items():
-            initial[k] = v
-        form = PhotoForm(initial=initial)
-        output = {
-            "form": form,
-            "path": initial['path']
-        }
-        logger.info(output)
-        return TemplateResponse(request, 'ra/photo_edit.html', output)
-    elif request.method == "POST":
-        form = PhotoForm(request.POST)
-        form.is_valid()
-        post_data = form.cleaned_data
-        for i in photo.data.keys():
-            photo.entity[i] = post_data.get(i)
-        photo.update()
-        messages.success(request, "{} was updated".format(photo.entity.id))
-        logger.info("{} was updated".format(photo.entity.id))
-        return redirect('ra:photo')
-
+    if settings.ENVIRONMENT == "local":
+        photo = f_datastore.Photo().get_entity_by_id(id)
+        if request.method == "GET":
+            initial = dict()
+            for k, v in photo.entity.items():
+                initial[k] = v
+            form = PhotoForm(initial=initial)
+            output = {
+                "form": form,
+                "path": initial['path']
+            }
+            logger.info(output)
+            return TemplateResponse(request, 'ra/photo_edit.html', output)
+        elif request.method == "POST":
+            form = PhotoForm(request.POST)
+            form.is_valid()
+            post_data = form.cleaned_data
+            for i in photo.data.keys():
+                photo.entity[i] = post_data.get(i)
+            photo.update()
+            messages.success(request, "{} was updated".format(photo.entity.id))
+            logger.info("{} was updated".format(photo.entity.id))
+            return redirect('ra:photo')
+    else:
+        raise Http404
 
 # ============================================================
 @access_time.measure
@@ -244,3 +234,33 @@ def training(request):
         }
         logger.info(output)
         return TemplateResponse(request, "ra/training.html", output)
+
+@access_time.measure
+def main(request):
+    if request.method == "GET":
+        form = FmanageForm(initial={"datetime": datetime.today()})
+        fds = f_datastore.Fds("fmanage")
+        data = fds.order("-datetime").get_list(10)
+        output = {
+            "msg": "Hello world",
+            "data": data,
+            "form": form,
+            "today": datetime.today()
+        }
+        return TemplateResponse(request, 'ra/main.html', output)
+    elif request.method == "POST":
+        form = FmanageForm(request.POST)
+        form.is_valid()
+        post_data = form.cleaned_data
+        fds = f_datastore.Fds("fmanage")
+        fds.data = {
+            "name": post_data.get("name"),
+            "age": post_data.gett("age"),
+            "datetime": post_data.get("datetime"),
+        }
+        if fds.create():
+            messages.success(request, "Saved")
+        else:
+            messages.error(request, "Failed")
+            logger.error("Failed")
+        return redirect("ra:main")

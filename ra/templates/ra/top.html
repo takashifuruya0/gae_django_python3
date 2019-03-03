@@ -1,12 +1,82 @@
-{% extends 'base.html' %}
-{% load static %}
+
+<!DOCTYPE html>
+<html>
 {% load humanize %}
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Where to Visit ?</title>
+    <!-- favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{%static 'favicon/favicon-camera.ico'%}">
+    <!-- Bootstrap CSS CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <!-- Our Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style4.css' %}">
+    <link rel="stylesheet" href="{% static 'css/loading.css' %}">
+    <!-- Font Awesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
+    <!--<script defer src="https://use.fontawesome.com/releases/v5.7.2/js/all.js" integrity="sha384-0pzryjIRos8mFBWMzSSZApWtPl/5++eIfzYmTgBBmXYdhvxPc+XcFEk+zJwDgWbP" crossorigin="anonymous"></script>-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <!--chart.js-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.min.js"></script>
+    <!--vue-->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
 
-{% block title %}About us{% endblock %}
-{% block body %}
-{{text}}
-{% endblock %}
 
-{% block script %}
 
-{% endblock %}
+<body>
+    <div class="top-wrapper">
+        <style>
+        .top-wrapper {
+            background-image : url({%static bg_photo.path %});
+            background-size: cover;
+        }
+        </style>
+        <!-- Page Content  -->
+        <div id="content">
+            <div class="container-fluid">
+                <div class="row" id="center-row">
+                    <div class="col-10 col-sm-auto col-md-auto col-lg-auto">
+                        <div class="card">
+                            <div class="card-header top-color">
+                                <h3>
+                                    <i class="fas fa-camera-retro"></i> Where to Visit?
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <p>
+                                    <strong>「旅に出たいけど、どこに行こう。。。？」</strong>
+                                </p>
+                                そんな時は、いろいろな写真を眺めて、次の旅先を見つけてください！
+                            </div>
+                            <div class="card-footer top-color" style="text-align:right;">
+                                <a class="btn btn-primary" href="{% url 'ra:photo' %}">
+                                    <i class="fas fa-plane"></i> Find where to visit !</h5>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-auto" id="bottom-row">
+                    {{bg_photo.datetime|date}},
+                    <a href="{%url 'ra:photo'%}?country={{bg_photo.country}}">{{bg_photo.country}}</a>,
+                    <a href="{%url 'ra:photo'%}?prefecture={{bg_photo.prefecture}}">{{bg_photo.prefecture}}</a>,
+                    <a href="{%url 'ra:photo'%}?sitename={{bg_photo.sitename}}">{{bg_photo.sitename}}</a>
+                    <br>
+                    © 2019 fk-management.com
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+

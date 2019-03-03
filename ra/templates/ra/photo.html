@@ -11,12 +11,12 @@
 <div class="row">
   <div class="col-6">
     <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-      <i class="fas fa-cloud"></i> Word Cloud
+      <i class="fas fa-cloud"></i> <span>Word Cloud</span>
     </button>
   </div>
   <div class="col-6">
     <button class="btn btn-secondary btn-block" type="button" onclick="{location.reload()}">
-      <i class="fas fa-random"></i> Re-Sample
+      <i class="fas fa-random"></i> <span>Re-Sample</span>
     </button>
   </div>
   <div class="col-12">
@@ -35,6 +35,7 @@
   <div class="col-12">
   {% for l in labels %}
     <h5>
+      <i class="fas fa-tag"></i> Tags:
       <span class="badge badge-warning">
         {{l.val}}
         <a href="?">
@@ -49,14 +50,10 @@
 
 <div class="row" id="photo-cards">
   {% for p in photo %}
-  <div class="col-6 col-md-4 col-lg-3">
+  <div class="col-6 col-md-4 col-lg-3 photo-card">
     <div class="card">
-      <img class="card-img-top"
-           {% if p.path_resized_480 %}
+      <img
            src="{%static p.path_resized_480 %}"
-           {% else %}
-           src="{%static p.path %}"
-           {% endif %}
            width="100%"
            title="{{p.datetime|date}}"
            data-toggle="modal" data-target="#{{p.id}}"
@@ -95,12 +92,16 @@
                 </h5>
               </td>
             </tr>
+            {% if p.comment %}
             <tr>
               <th>Comment</th>
               <td>{{p.comment}}</td>
             </tr>
+            {% endif %}
           </table>
-          <a class="btn btn-info" href="{% url 'ra:photo_edit' id=p.id%}">Edit</a>
+          {% if environment == "local" %}
+          <a class="btn btn-info" href="{%url 'ra:photo_edit' id=p.id %}">Edit</a>
+          {% endif %}
         </div>
         <div class="modal-footer">
           <p>{{p.path}} on {{p.datetime|date}}</p>
@@ -163,6 +164,7 @@ function draw_wc(data){
     .fontSize(function(d) { return d.size; })
     .on("end", draw) //描画関数の読み込み
     .start();
+  return words;
 
   // wordcloud 描画
   function draw(words) {
@@ -203,18 +205,16 @@ function draw_wc(data){
           })
           .done(function(data_ajax) {
             d3.select(TARGET_ELEMENT_ID).select('svg').remove();
-            draw_wc(data_ajax.wordcloud_list);
             cards = d3.select('#photo-cards')
             cards.selectAll('div').remove()
             for (sample of data_ajax.samples){  // 配列のfor文はof
               // 写真
               cards
                 .append('div')
-                  .attr("class", "col-6 col-md-4 col-lg-3") // style using semantic ui
+                  .attr("class", "col-6 col-md-4 col-lg-3 photo-card") // style using semantic ui
                 .append('div')
                   .attr("class", "card")
                 .append('img')
-                  .attr("class", "card-img-top")
                   .attr("src", "/static/"+sample.path_resized_480)
                   .attr("width", "100%")
                   .attr("data-toggle", "modal")
@@ -250,20 +250,23 @@ function draw_wc(data){
               tr1.append("td").append("h5").html(
                 'Prefecture: <a class="badge bg-warning" href="?prefecture='+sample.prefecture+'">'+sample.prefecture+'</a>'
               )
-              var tr2 = table.append("tr")
-              tr2.append("th").text("Comment")
-              tr2.append("td").text(sample.comment)
+              if (sample.comment) {
+                var tr2 = table.append("tr")
+                tr2.append("th").text("Comment")
+                tr2.append("td").text(sample.comment)
+              }
               var footer = modal.append("div")
                 .attr("class", "modal-footer")
                 .append('p')
-                  .attr("OK")
+                  .text(sample.path + " on " + sample.datetime.substr(0,10))
             }
+            draw_wc(data_ajax.wordcloud_list);
             $('#overlay').addClass('hide');
           })
         });
   }
 }
 
-draw_wc(data_list)
+words = draw_wc(data_list)
 </script>
 {% endblock %}

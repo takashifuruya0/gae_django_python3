@@ -1,7 +1,6 @@
 # [START django_app]
 runtime: python37
-entrypoint: gunicorn -b :$PORT gae_django_python3.wsgi:application
-
+entrypoint: gunicorn -b :$PORT gae_django_python3.wsgi:application --env DJANGO_SETTINGS_MODULE=gae_django_python3.environment.gae
 handlers:
 # This configures Google App Engine to serve the files in the app's static
 # directory.

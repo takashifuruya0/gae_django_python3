@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{% block title %}{% endblock %}</title>
+    <title>Where to Visit ?</title>
     <!-- favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="{%static 'favicon/favicon-camera.ico'%}">
     <!-- Bootstrap CSS CDN -->
@@ -42,6 +42,17 @@
             </div>
 
             <ul class="list-unstyled components">
+                {% for l in labels %}
+                <li>
+                  <a href="">
+                      <i class="fas fa-tag"></i> Tags:
+                      <span class="badge badge-warning bg-sm">
+                        {{l.val}}
+                      </span>
+                  </a>
+                </li>
+                <hr>
+                {% endfor %}
 
                 {% if property_list %}
                 <li>
@@ -49,12 +60,14 @@
                         <i class="fas fa-globe"></i> Country
                     </a>
                     <ul class="collapse list-unstyled" id="countrySubmenu">
-                        {% for plc in property_list.country.values %}
+                        {% for plc in property_list.country %}
+                        {% if plc.count > 0 %}
                         <li>
                             <a href="{% url 'ra:photo' %}{{plc.url}}">
                                 {{plc.word}} <span class="badge bg-light" style="color:black;">{{plc.count}}</span>
                             </a>
                         </li>
+                        {% endif %}
                         {% endfor %}
                     </ul>
                 </li>
@@ -63,12 +76,14 @@
                         <i class="fas fa-map-signs"></i> Prefecture
                     </a>
                     <ul class="collapse list-unstyled" id="prefectureSubmenu">
-                        {% for plc in property_list.prefecture.values %}
+                        {% for plc in property_list.prefecture %}
+                        {% if plc.count > 0 %}
                         <li>
                             <a href="{% url 'ra:photo' %}{{plc.url}}">
                                 {{plc.word}} <span class="badge bg-light" style="color:black;">{{plc.count}}</span>
                             </a>
                         </li>
+                        {% endif %}
                         {% endfor %}
                     </ul>
                 </li>
@@ -77,27 +92,25 @@
                         <i class="fas fa-map-marker-alt"></i> Site
                     </a>
                     <ul class="collapse list-unstyled" id="sitenameSubmenu">
-                        {% for plc in property_list.sitename.values %}
+                        {% for plc in property_list.sitename %}
+                        {% if plc.count > 0 %}
                         <li>
                             <a href="{% url 'ra:photo' %}{{plc.url}}">
                                 {{plc.word}} <span class="badge bg-light" style="color:black;">{{plc.count}}</span>
                             </a>
                         </li>
+                        {% endif %}
                         {% endfor %}
                     </ul>
                 </li>
                 {% endif %}
-
-                <li>
-                    <a href="{%url 'ra:main'%}">
-                        <i class="fas fa-info-circle"></i> About us
-                    </a>
-                </li>
             </ul>
 
             <ul class="list-unstyled CTAs">
                 <li>
-                    <a href="/admin" class="download"><i class="fas fa-cogs"></i> Admin</a>
+                    <a href="{%url 'ra:main'%}" class="download">
+                        <i class="fas fa-info-circle"></i> About <strong>Where to Visit?</strong>
+                    </a>
                 </li>
             </ul>
         </nav>
@@ -114,12 +127,15 @@
             {% endif %}
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <div class="container-fluid">
+
                     <button type="button" id="sidebarCollapse" class="btn btn-info">
                         <i class="fas fa-align-left"></i>
                         <span>Toggle Sidebar</span>
                     </button>
+
                     {% if title %}<h4>{{title}}</h4>{% endif %}
-                    <p>{{ today | date}}</p>
+                    <p>© 2019 fk-management.com</p>
+
                 </div>
             </nav>
 
