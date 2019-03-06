@@ -69,15 +69,6 @@
                         <i class="fas fa-globe"></i> Country
                     </a>
                     <ul class="collapse list-unstyled" id="countrySubmenu">
-                        {% for plc in property_list.country %}
-                        {% if plc.count > 0 %}
-                        <li>
-                            <a href="#" onclick="update_photo_by_sidebar('{{plc.property}}', '{{plc.word}}')">
-                                {{plc.word}} <span class="badge bg-light" style="color:black;">{{plc.count}}</span>
-                            </a>
-                        </li>
-                        {% endif %}
-                        {% endfor %}
                     </ul>
                 </li>
                 <li>
@@ -85,15 +76,6 @@
                         <i class="fas fa-map-signs"></i> Prefecture
                     </a>
                     <ul class="collapse list-unstyled" id="prefectureSubmenu">
-                        {% for plc in property_list.prefecture %}
-                        {% if plc.count > 0 %}
-                        <li>
-                            <a href="#" onclick="update_photo_by_sidebar('{{plc.property}}', '{{plc.word}}')">
-                                {{plc.word}} <span class="badge bg-light" style="color:black;">{{plc.count}}</span>
-                            </a>
-                        </li>
-                        {% endif %}
-                        {% endfor %}
                     </ul>
                 </li>
                 <li>
@@ -101,15 +83,6 @@
                         <i class="fas fa-map-marker-alt"></i> Site
                     </a>
                     <ul class="collapse list-unstyled" id="sitenameSubmenu">
-                        {% for plc in property_list.sitename %}
-                        {% if plc.count > 0 %}
-                        <li>
-                            <a href="#" onclick="update_photo_by_sidebar('{{plc.property}}', '{{plc.word}}')">
-                                {{plc.word}} <span class="badge bg-light" style="color:black;">{{plc.count}}</span>
-                            </a>
-                        </li>
-                        {% endif %}
-                        {% endfor %}
                     </ul>
                 </li>
                 {% endif %}

@@ -51,8 +51,8 @@ if (window.innerWidth > 768) {
 }
 
 function draw_cards(data_ajax){
-    //CARDS
-    cards = d3.select('#photo-cards')
+    //CARDS and MODALS
+    var cards = d3.select('#photo-cards')
     cards.selectAll('div').remove()
     for (sample of data_ajax.samples){  // 配列のfor文はof
       // CARDS
@@ -66,7 +66,7 @@ function draw_cards(data_ajax){
           .attr("width", "100%")
           .attr("data-toggle", "modal")
           .attr("data-target", "#"+sample.id)
-      // MODAL
+      // MODALS
       var modal = cards
         .append("div")
           .attr("class", "modal fade")
@@ -186,6 +186,8 @@ function draw_wc(data){
             }
           })
           .done(function(data_ajax) {
+            // sidebar
+            update_sidebar(data_ajax)
             // card
             draw_cards(data_ajax)
             // Word Cloud
@@ -212,6 +214,8 @@ window.onload = function(){
     }
   })
   .done(function(data_ajax) {
+    // sidebar
+    update_sidebar(data_ajax)
     // card
     draw_cards(data_ajax)
     // word cloud
@@ -241,13 +245,49 @@ var update_photo_by_sidebar = function (prop, text) {
   .done(function(data_ajax) {
     // card
     draw_cards(data_ajax)
+    // sidebar
+    update_sidebar(data_ajax)
     // word cloud
     var words = draw_wc(data_ajax.wordcloud_list)
+
     // overlay
     d3.select(TARGET_ELEMENT_ID).select('svg').remove();
     $('#overlay').addClass('hide');
   })
   .fail(function(){$('#overlay').addClass('hide');})
+}
+
+// sidebarのupdate
+var update_sidebar = function (data_ajax) {
+    var ul_country = d3.select('#countrySubmenu')
+    ul_country.selectAll('li').remove()
+    for (sample of data_ajax.property_list.country) {  // 配列のfor文はof
+        if (sample.count > 0){
+            ul_country.append('li').append('a')
+                .attr("onclick", "update_photo_by_sidebar('" + sample.property +"', '" + sample.word + "')")
+                .html(sample.word + '<span class="badge bg-light" style="color:black;">' + sample.count + '</span>')
+        }
+    }
+
+    var ul_prefecture = d3.select('#prefectureSubmenu')
+    ul_prefecture.selectAll('li').remove()
+    for (sample of data_ajax.property_list.prefecture) {  // 配列のfor文はof
+        if (sample.count > 0){
+            ul_prefecture.append('li').append('a')
+                .attr("onclick", "update_photo_by_sidebar('" + sample.property +"', '" + sample.word + "')")
+                .html(sample.word + '<span class="badge bg-light" style="color:black;">' + sample.count + '</span>')
+        }
+    }
+
+    var ul_sitename = d3.select('#sitenameSubmenu')
+    ul_sitename.selectAll('li').remove()
+    for (sample of data_ajax.property_list.sitename) {  // 配列のfor文はof
+        if (sample.count > 0){
+            ul_sitename.append('li').append('a')
+                .attr("onclick", "update_photo_by_sidebar('" + sample.property +"', '" + sample.word + "')")
+                .html(sample.word + '<span class="badge bg-light" style="color:black;">' + sample.count + '</span>')
+        }
+    }
 }
 </script>
 
