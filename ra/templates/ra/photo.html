@@ -107,6 +107,16 @@ function draw_cards(data_ajax){
         tr2.append("th").text("Comment")
         tr2.append("td").text(sample.comment)
       }
+      if (sample.landmark){
+          var tr3 = table.append("tr")
+          tr3.append("th").text("Landmark detected by VisionAPI")
+          tr3.append("tr").text(sample.landmark)
+          var tr4 = table.append("tr")
+          tr4.append("th").text("Location detected by VisionAPI")
+          tr4.append("tr").text(
+              "(" + sample.location.latitude + ", " + sample.location.longitude + ")"
+          )
+      }
       var footer = modal.append("div")
         .attr("class", "modal-footer")
         .append('p')

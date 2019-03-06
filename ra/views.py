@@ -65,8 +65,17 @@ def ajax(request):
         for p in photo:
             sample = {"id": p.id}
             for k, v in p.items():
-                val = v.__str__() if k in ("datetime", "location") else v
-                sample[k] = val
+                if k == "datetime":
+                    sample[k] = v.__str__()
+                elif k == "location":
+                    logger.info(v)
+                    sample[k] = {
+                        "latitude": v.latitude,
+                        "longitude": v.longitude,
+                    }
+                    logger.info(sample[k])
+                else:
+                    sample[k] = v
             samples.append(sample)
         # データ数が少ないとwcがうまくいかない→数を増やす
         while True:
