@@ -29,75 +29,10 @@
       </div>
     </div>
   </div>
-  <div class="col-12">
-    <p id="ajax_response"></p>
-  </div>
 </div>
 
 <hr>
-
 <div class="row" id="photo-cards">
-  {% for p in photo %}
-  <div class="col-6 col-md-4 col-lg-3 photo-card">
-    <div class="card">
-      <img
-           src="{%static p.path_resized_480 %}"
-           width="100%"
-           title="{{p.datetime|date}}"
-           data-toggle="modal" data-target="#{{p.id}}"
-      >
-    </div>
-  </div>
-
-  {% endfor %}
-
-  {% for p in photo %}
-  <!-- Modal order-->
-  <div class="modal fade" id="{{p.id}}" tabindex="-1" role="dialog" aria-labelledby="order" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">
-            {{p.sitename}}
-          </h4>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <img src="{%static p.path_resized_1200 %}" width="100%">
-          <table class="table">
-            <tr>
-              <td>
-                <h5>
-                  Country: <a class="badge bg-warning" href="?country={{p.country}}">{{p.country}}</a>
-                </h5>
-              </td>
-              <td>
-                <h5>
-                  Prefecture: <a class="badge bg-warning" href="?prefecture={{p.prefecture}}">{{p.prefecture}}</a>
-                </h5>
-              </td>
-            </tr>
-            {% if p.comment %}
-            <tr>
-              <th>Comment</th>
-              <td>{{p.comment}}</td>
-            </tr>
-            {% endif %}
-          </table>
-          {% if environment == "local" %}
-          <a class="btn btn-info" href="{%url 'ra:photo_edit' id=p.id %}">Edit</a>
-          {% endif %}
-        </div>
-        <div class="modal-footer">
-          <p>{{p.path}} on {{p.datetime|date}}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
 </div>
 {% endblock %}
 
@@ -105,7 +40,6 @@
 <!-- word cloud -->
 <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
 <script src="{% static 'js/d3.layout.cloud.js' %}"></script>
-{#<script src="{% static 'js/cloud.js'%}"></script>#}
 <script>
 var TARGET_ELEMENT_ID = '#wordcloud'; // 描画先
 if (window.innerWidth > 768) {
@@ -116,21 +50,81 @@ if (window.innerWidth > 768) {
   var w = 500;
 }
 
-function test_h(text){
-  window.alert(text);
-  draw_wc(data_list);
+function draw_cards(data_ajax){
+    //CARDS and MODALS
+    var cards = d3.select('#photo-cards')
+    cards.selectAll('div').remove()
+    for (sample of data_ajax.samples){  // 配列のfor文はof
+      // CARDS
+      cards
+        .append('div')
+          .attr("class", "col-6 col-md-4 col-lg-3 photo-card") // style using semantic ui
+        .append('div')
+          .attr("class", "card")
+        .append('img')
+          .attr("src", "/static/"+sample.path_resized_480)
+          .attr("width", "100%")
+          .attr("data-toggle", "modal")
+          .attr("data-target", "#"+sample.id)
+      // MODALS
+      var modal = cards
+        .append("div")
+          .attr("class", "modal fade")
+          .attr("id", sample.id)
+          .attr("tabindex", "-1")
+          .attr("role", "dialog")
+          .attr("aria-labelledby", "order")
+          .attr("aria-hidden", "true")
+        .append("div")
+          .attr("class", "modal-dialog modal-lg")
+          .attr("role", "document")
+        .append("div")
+          .attr("class", "modal-content")
+      var header = modal.append("div")
+        .attr("class", "modal-header")
+        .html(
+          '<h4 class="modal-title">'
+            + sample.sitename
+            + '</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+        )
+      var body = modal.append("div")
+        .attr("class", "modal-body")
+        .html("<img src=/static/"+sample.path_resized_1200+" width=100%>")
+      var table = body.append("table").attr("class", "table")
+      var tr1 = table.append("tr")
+      tr1.append("td").append("h5").html(
+        'Country: <a class="badge bg-warning" href="?country='+sample.country+'">'
+          + sample.country
+          + '</a>'
+      )
+      tr1.append("td").append("h5").html(
+        'Prefecture: <a class="badge bg-warning" href="?prefecture='+sample.prefecture+'">'
+          + sample.prefecture
+          + '</a>'
+      )
+      if (sample.comment) {
+        var tr2 = table.append("tr")
+        tr2.append("th").text("Comment")
+        tr2.append("td").text(sample.comment)
+      }
+      if (sample.landmark){
+          var tr3 = table.append("tr")
+          tr3.append("th").text("Landmark detected by VisionAPI")
+          tr3.append("tr").text(sample.landmark)
+          var tr4 = table.append("tr")
+          tr4.append("th").text("Location detected by VisionAPI")
+          tr4.append("tr").text(
+              "(" + sample.location.latitude + ", " + sample.location.longitude + ")"
+          )
+      }
+      var footer = modal.append("div")
+        .attr("class", "modal-footer")
+        .append('p')
+          .text(sample.path + " on " + sample.datetime.substr(0,10))
+    }
+    // LABEL
+    d3.selectAll('.ajax_label').text(data_ajax.label)
 }
-
-var data_list = [
-  {% for td in wordcloud_list %}
-  {
-    "word": "{{td.word}}",
-    "count": {{td.count}},
-    "url": "{{td.url}}",
-    "property": "{{td.property}}",
-  },
-{% endfor %}
-]
 
 function draw_wc(data){
   var random = d3.randomIrwinHall(2); // アーウィンホール分布
@@ -175,7 +169,7 @@ function draw_wc(data){
           return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
         })
         .text(function(d) { return d.text; })
-        .on("click", function (d, i){
+        .on("click", function (d){
           // ajax
           $.ajax({
             url: "{% url 'ra:ajax' %}",
@@ -192,72 +186,110 @@ function draw_wc(data){
             }
           })
           .done(function(data_ajax) {
-            //CARDS
-            cards = d3.select('#photo-cards')
-            cards.selectAll('div').remove()
-            for (sample of data_ajax.samples){  // 配列のfor文はof
-              // CARDS
-              cards
-                .append('div')
-                  .attr("class", "col-6 col-md-4 col-lg-3 photo-card") // style using semantic ui
-                .append('div')
-                  .attr("class", "card")
-                .append('img')
-                  .attr("src", "/static/"+sample.path_resized_480)
-                  .attr("width", "100%")
-                  .attr("data-toggle", "modal")
-                  .attr("data-target", "#"+sample.id)
-              // MODAL
-              var modal = cards
-                .append("div")
-                  .attr("class", "modal fade")
-                  .attr("id", sample.id)
-                  .attr("tabindex", "-1")
-                  .attr("role", "dialog")
-                  .attr("aria-labelledby", "order")
-                  .attr("aria-hidden", "true")
-                .append("div")
-                  .attr("class", "modal-dialog modal-lg")
-                  .attr("role", "document")
-                .append("div")
-                  .attr("class", "modal-content")
-              var header = modal.append("div")
-                .attr("class", "modal-header")
-                .html(
-                  '<h4 class="modal-title">'+sample.sitename+'</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
-                )
-              var body = modal.append("div")
-                .attr("class", "modal-body")
-                .html("<img src=/static/"+sample.path_resized_1200+" width=100%>")
-              var table = body.append("table").attr("class", "table")
-              var tr1 = table.append("tr")
-              tr1.append("td").append("h5").html(
-                'Country: <a class="badge bg-warning" href="?country='+sample.country+'">'+sample.country+'</a>'
-              )
-              tr1.append("td").append("h5").html(
-                'Prefecture: <a class="badge bg-warning" href="?prefecture='+sample.prefecture+'">'+sample.prefecture+'</a>'
-              )
-              if (sample.comment) {
-                var tr2 = table.append("tr")
-                tr2.append("th").text("Comment")
-                tr2.append("td").text(sample.comment)
-              }
-              var footer = modal.append("div")
-                .attr("class", "modal-footer")
-                .append('p')
-                  .text(sample.path + " on " + sample.datetime.substr(0,10))
-            }
-            // LABEL
-            d3.selectAll('.ajax_label').text(data_ajax.label)
+            // sidebar
+            update_sidebar(data_ajax)
+            // card
+            draw_cards(data_ajax)
             // Word Cloud
             d3.select(TARGET_ELEMENT_ID).select('svg').remove();
-            draw_wc(data_ajax.wordcloud_list);
+            var words = draw_wc(data_ajax.wordcloud_list);
+            // overlay
             $('#overlay').addClass('hide');
           })
+          .fail(function(){$('#overlay').addClass('hide');})
         });
   }
 }
 
-words = draw_wc(data_list)
+window.onload = function(){
+  // ajax
+  $.ajax({
+    url: "{% url 'ra:ajax' %}",
+    method: "GET",
+    timeout: 10000,
+    dataType: "json",
+    //リクエストが完了するまで実行される
+    beforeSend: function(){
+      $('#overlay').removeClass('hide');
+    }
+  })
+  .done(function(data_ajax) {
+    // sidebar
+    update_sidebar(data_ajax)
+    // card
+    draw_cards(data_ajax)
+    // word cloud
+    var words = draw_wc(data_ajax.wordcloud_list)
+    // overlay
+    $('#overlay').addClass('hide');
+  })
+  .fail(function(){$('#overlay').addClass('hide');})
+}
+
+var update_photo_by_sidebar = function (prop, text) {
+    // ajax
+  $.ajax({
+    url: "{% url 'ra:ajax' %}",
+    method: "GET",
+    data: {
+      text: text,
+      prop: prop,
+    },
+    timeout: 10000,
+    dataType: "json",
+    //リクエストが完了するまで実行される
+    beforeSend: function(){
+      $('#overlay').removeClass('hide');
+    }
+  })
+  .done(function(data_ajax) {
+    // card
+    draw_cards(data_ajax)
+    // sidebar
+    update_sidebar(data_ajax)
+    // word cloud
+    var words = draw_wc(data_ajax.wordcloud_list)
+
+    // overlay
+    d3.select(TARGET_ELEMENT_ID).select('svg').remove();
+    $('#overlay').addClass('hide');
+  })
+  .fail(function(){$('#overlay').addClass('hide');})
+}
+
+// sidebarのupdate
+var update_sidebar = function (data_ajax) {
+    var ul_country = d3.select('#countrySubmenu')
+    ul_country.selectAll('li').remove()
+    for (sample of data_ajax.property_list.country) {  // 配列のfor文はof
+        if (sample.count > 0){
+            ul_country.append('li').append('a')
+                .attr("onclick", "update_photo_by_sidebar('" + sample.property +"', '" + sample.word + "')")
+                .html(sample.word + '<span class="badge bg-light" style="color:black;">' + sample.count + '</span>')
+        }
+    }
+
+    var ul_prefecture = d3.select('#prefectureSubmenu')
+    ul_prefecture.selectAll('li').remove()
+    for (sample of data_ajax.property_list.prefecture) {  // 配列のfor文はof
+        if (sample.count > 0){
+            ul_prefecture.append('li').append('a')
+                .attr("onclick", "update_photo_by_sidebar('" + sample.property +"', '" + sample.word + "')")
+                .html(sample.word + '<span class="badge bg-light" style="color:black;">' + sample.count + '</span>')
+        }
+    }
+
+    var ul_sitename = d3.select('#sitenameSubmenu')
+    ul_sitename.selectAll('li').remove()
+    for (sample of data_ajax.property_list.sitename) {  // 配列のfor文はof
+        if (sample.count > 0){
+            ul_sitename.append('li').append('a')
+                .attr("onclick", "update_photo_by_sidebar('" + sample.property +"', '" + sample.word + "')")
+                .html(sample.word + '<span class="badge bg-light" style="color:black;">' + sample.count + '</span>')
+        }
+    }
+}
 </script>
+
+
 {% endblock %}

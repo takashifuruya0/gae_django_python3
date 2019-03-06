@@ -65,8 +65,17 @@ def ajax(request):
         for p in photo:
             sample = {"id": p.id}
             for k, v in p.items():
-                val = v.__str__() if k in ("datetime", "location") else v
-                sample[k] = val
+                if k == "datetime":
+                    sample[k] = v.__str__()
+                elif k == "location":
+                    logger.info(v)
+                    sample[k] = {
+                        "latitude": v.latitude,
+                        "longitude": v.longitude,
+                    }
+                    logger.info(sample[k])
+                else:
+                    sample[k] = v
             samples.append(sample)
         # データ数が少ないとwcがうまくいかない→数を増やす
         while True:
@@ -74,11 +83,16 @@ def ajax(request):
                 break
             else:
                 wordcloud_list += wordcloud_list
+        # property list
+        for tp in target_properties:
+            property_list[tp] = list(property_list[tp].values())
+            property_list[tp].sort(key=lambda x: x['count'], reverse=True)
         # response in JSON
         res_data = {
             "wordcloud_list": wordcloud_list,
             "samples": samples,
             "label": labels[0]['val'],
+            "property_list": property_list,
         }
         response = json.dumps(res_data)  # JSON形式に直して・・
         return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・・
