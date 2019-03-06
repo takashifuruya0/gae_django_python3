@@ -83,11 +83,16 @@ def ajax(request):
                 break
             else:
                 wordcloud_list += wordcloud_list
+        # property list
+        for tp in target_properties:
+            property_list[tp] = list(property_list[tp].values())
+            property_list[tp].sort(key=lambda x: x['count'], reverse=True)
         # response in JSON
         res_data = {
             "wordcloud_list": wordcloud_list,
             "samples": samples,
             "label": labels[0]['val'],
+            "property_list": property_list,
         }
         response = json.dumps(res_data)  # JSON形式に直して・・
         return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・・

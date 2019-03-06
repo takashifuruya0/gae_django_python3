@@ -72,7 +72,7 @@
                         {% for plc in property_list.country %}
                         {% if plc.count > 0 %}
                         <li>
-                            <a href="{% url 'ra:photo' %}{{plc.url}}">
+                            <a href="#" onclick="update_photo_by_sidebar('{{plc.property}}', '{{plc.word}}')">
                                 {{plc.word}} <span class="badge bg-light" style="color:black;">{{plc.count}}</span>
                             </a>
                         </li>
@@ -88,7 +88,7 @@
                         {% for plc in property_list.prefecture %}
                         {% if plc.count > 0 %}
                         <li>
-                            <a href="{% url 'ra:photo' %}{{plc.url}}">
+                            <a href="#" onclick="update_photo_by_sidebar('{{plc.property}}', '{{plc.word}}')">
                                 {{plc.word}} <span class="badge bg-light" style="color:black;">{{plc.count}}</span>
                             </a>
                         </li>
@@ -104,7 +104,7 @@
                         {% for plc in property_list.sitename %}
                         {% if plc.count > 0 %}
                         <li>
-                            <a href="{% url 'ra:photo' %}{{plc.url}}">
+                            <a href="#" onclick="update_photo_by_sidebar('{{plc.property}}', '{{plc.word}}')">
                                 {{plc.word}} <span class="badge bg-light" style="color:black;">{{plc.count}}</span>
                             </a>
                         </li>
@@ -114,13 +114,6 @@
                 </li>
                 {% endif %}
             </ul>
-            <!--<ul class="list-unstyled CTAs">-->
-                <!--<li>-->
-                    <!--<a href="{%url 'ra:main'%}" class="download">-->
-                        <!--<i class="fas fa-info-circle"></i> About <strong>Where to Visit?</strong>-->
-                    <!--</a>-->
-                <!--</li>-->
-            <!--</ul>-->
         </nav>
 
         <!--Spinner-->

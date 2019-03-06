@@ -199,8 +199,7 @@ function draw_wc(data){
   }
 }
 
-
-window.onload =  function (d){
+window.onload = function(){
   // ajax
   $.ajax({
     url: "{% url 'ra:ajax' %}",
@@ -223,5 +222,34 @@ window.onload =  function (d){
   .fail(function(){$('#overlay').addClass('hide');})
 }
 
+var update_photo_by_sidebar = function (prop, text) {
+    // ajax
+  $.ajax({
+    url: "{% url 'ra:ajax' %}",
+    method: "GET",
+    data: {
+      text: text,
+      prop: prop,
+    },
+    timeout: 10000,
+    dataType: "json",
+    //リクエストが完了するまで実行される
+    beforeSend: function(){
+      $('#overlay').removeClass('hide');
+    }
+  })
+  .done(function(data_ajax) {
+    // card
+    draw_cards(data_ajax)
+    // word cloud
+    var words = draw_wc(data_ajax.wordcloud_list)
+    // overlay
+    d3.select(TARGET_ELEMENT_ID).select('svg').remove();
+    $('#overlay').addClass('hide');
+  })
+  .fail(function(){$('#overlay').addClass('hide');})
+}
 </script>
+
+
 {% endblock %}
