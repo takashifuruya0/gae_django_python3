@@ -11,5 +11,8 @@ indexes:
   - name: sitename
   - name: prefecture
   - name: country
+  - name: landmark
+  - name: score
+  - name: location
   - name: datetime
     direction: desc
