@@ -86,14 +86,19 @@ function draw_cards(data_ajax){
         .append("div")
           .attr("class", "modal-content")
       // header
-      modal.append("div")
+      var header = modal.append("div")
         .attr("class", "modal-header")
-        .html(
-          '<h4 class="modal-title">'
-            + sample.sitename
-            + '</h4>'
-            + '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
-        )
+      header.append('h4')
+          .attr("class", "modal-title")
+          .text(sample.sitename)
+      header.append('button')
+        .attr("type", "button")
+        .attr("class", "close")
+        .attr("data-dismiss", "modal")
+        .attr("aria-label", "Close")
+        .append("span")
+          .attr("aria-hidden", "true")
+          .html("&times;")
       // body
       var body = modal.append("div")
         .attr("class", "modal-body")
@@ -274,6 +279,7 @@ var update_photo_by_sidebar = function (prop, text) {
 
 // sidebarのupdate
 var update_sidebar = function (data_ajax) {
+    // country
     var ul_country = d3.select('#countrySubmenu')
     ul_country.selectAll('li').remove()
     for (sample of data_ajax.property_list.country) {  // 配列のfor文はof
@@ -283,7 +289,7 @@ var update_sidebar = function (data_ajax) {
                 .html(sample.word + '<span class="badge bg-light" style="color:black;">' + sample.count + '</span>')
         }
     }
-
+    // prefecture
     var ul_prefecture = d3.select('#prefectureSubmenu')
     ul_prefecture.selectAll('li').remove()
     for (sample of data_ajax.property_list.prefecture) {  // 配列のfor文はof
@@ -293,7 +299,7 @@ var update_sidebar = function (data_ajax) {
                 .html(sample.word + '<span class="badge bg-light" style="color:black;">' + sample.count + '</span>')
         }
     }
-
+    // sitename
     var ul_sitename = d3.select('#sitenameSubmenu')
     ul_sitename.selectAll('li').remove()
     for (sample of data_ajax.property_list.sitename) {  // 配列のfor文はof
