@@ -77,6 +77,9 @@ def ajax(request):
                 else:
                     sample[k] = v
             samples.append(sample)
+        # sampleは20件取得
+        samples = random.sample(samples, 20) if len(samples) > 20 else samples
+
         # データ数が少ないとwcがうまくいかない→数を増やす
         while True:
             if len(wordcloud_list) > 30:

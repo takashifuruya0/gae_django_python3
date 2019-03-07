@@ -8,7 +8,7 @@
     <button class="btn btn-warning btn-block">
       <i class="fas fa-tag"></i> Tags:
       <span class="badge badge-light">
-        <span class="ajax_label">{{label}}</span>
+        <span class="ajax_label"></span>
       </span>
     </button>
   </div>
@@ -55,6 +55,11 @@ function draw_cards(data_ajax){
     var cards = d3.select('#photo-cards')
     cards.selectAll('div').remove()
     for (sample of data_ajax.samples){  // 配列のfor文はof
+      do_on_click = function(prop, val){
+          var res = "$('#" + sample.id + "').modal('hide');update_photo_by_sidebar('"
+              + prop + "', '" + val + "')"
+          return res
+      }
       // CARDS
       cards
         .append('div')
@@ -80,33 +85,42 @@ function draw_cards(data_ajax){
           .attr("role", "document")
         .append("div")
           .attr("class", "modal-content")
-      var header = modal.append("div")
+      // header
+      modal.append("div")
         .attr("class", "modal-header")
         .html(
           '<h4 class="modal-title">'
             + sample.sitename
-            + '</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+            + '</h4>'
+            + '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
         )
+      // body
       var body = modal.append("div")
         .attr("class", "modal-body")
-        .html("<img src=/static/"+sample.path_resized_1200+" width=100%>")
+      // img
+      body.append('img')
+        .attr("src", "/static/" + sample.path_resized_1200)
+        .attr("width", "100%")
+      // table
       var table = body.append("table").attr("class", "table")
       var tr1 = table.append("tr")
-      tr1.append("td").append("h5").html(
-        'Country: <a class="badge bg-warning" href="?country='+sample.country+'">'
-          + sample.country
-          + '</a>'
-      )
-      tr1.append("td").append("h5").html(
-        'Prefecture: <a class="badge bg-warning" href="?prefecture='+sample.prefecture+'">'
-          + sample.prefecture
-          + '</a>'
-      )
+      // country
+      tr1.append('td').append('h5').text("Country: ").append('a')
+        .attr("class", "badge bg-warning")
+        .attr("onclick", do_on_click('country', sample.country))
+        .text(sample.country)
+      // prefecture
+      tr1.append('td').append('h5').text("Prefecture: ").append('a')
+        .attr("class", "badge bg-warning")
+        .attr("onclick", do_on_click('prefecture', sample.prefecture))
+        .text(sample.prefecture)
+      // comment
       if (sample.comment) {
         var tr2 = table.append("tr")
         tr2.append("th").text("Comment")
         tr2.append("td").text(sample.comment)
       }
+      // landmark/location detected by VisionAPI
       if (sample.landmark){
           var tr3 = table.append("tr")
           tr3.append("th").text("Landmark detected by VisionAPI")
@@ -117,6 +131,7 @@ function draw_cards(data_ajax){
               "(" + sample.location.latitude + ", " + sample.location.longitude + ")"
           )
       }
+      // footer
       var footer = modal.append("div")
         .attr("class", "modal-footer")
         .append('p')
