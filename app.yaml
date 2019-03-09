@@ -7,6 +7,10 @@ automatic_scaling:
   min_pending_latency: 3000ms  # リクエストを処理するまでに許される待ち時間の最小
   max_pending_latency: automatic
 
+# env_variables
+includes:
+- secret.yaml
+
 handlers:
 # This configures Google App Engine to serve the files in the app's static
 # directory.

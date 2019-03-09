@@ -14,3 +14,5 @@ DATABASES = {
 
 ENVIRONMENT = "gae"
 DEBUG = False
+
+GOOGLE_MAPS_API_KEY = os.environ

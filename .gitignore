@@ -6,3 +6,4 @@ env/*
 .env
 cover/*
 .coverage
+secret.yaml
