@@ -16,3 +16,12 @@ indexes:
   - name: location
   - name: datetime
     direction: desc
+  - name: premise
+  - name: route
+  - name: sublocality
+  - name: locality
+  - name: administrative_area_level_2
+  - name: administrative_area_level_1
+  - name: country_en
+  - name: city
+  - name: town

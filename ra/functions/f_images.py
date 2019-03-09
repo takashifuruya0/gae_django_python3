@@ -6,13 +6,15 @@ import io
 from google.cloud import vision
 from google.cloud.vision import types
 from google.cloud.datastore.helpers import GeoPoint
+import googlemaps
+import requests
+from django.conf import settings
 import logging
 logger = logging.getLogger('django')
 
 
 def resize_images():
     target = os.listdir('static/image')
-    done_resizing = os.listdir('static/image/resized')
     target.remove("resized")
     for t in target:
         # resize
@@ -24,27 +26,22 @@ def resize_images():
             img_resize = img.resize((int(width_rev), int(height_rev)))
             img_resize.save("static/resized_{0}/{1}".format(width_rev, t))
             photo.entity['path_resized_{}'.format(width_rev)] = "resized_{0}/{1}".format(width_rev, t)
-        # img_resize = img.resize((int(img.width / 3), int(img.height / 3)))
-        # update datastore
-        # photo.entity['path_resized'] = "image/resized/{}".format(t)
         photo.entity['datetime'] = get_datetime(img)
         photo.update()
     return True
 
 
-# date
+# imgから撮影日時を取得
 def get_datetime(img):
     exif = img._getexif()
     for id, val in exif.items():
         if id == 36867:
             return datetime(int(val[0:4]), int(val[5:7]), int(val[8:10]))
+    return None
 
-    return ''
 
-
-def get_info_by_visionapi():
-    # Instantiates a client
-    client = vision.ImageAnnotatorClient()
+# apiの情報でentityをupdate
+def update_entities_by_api(do_all=False):
     # target
     target = os.listdir('static/image')
     target.remove("resized")
@@ -52,69 +49,129 @@ def get_info_by_visionapi():
         # entity
         photo = f_datastore.Photo().filter("path", "=", "image/{}".format(t)).get_entity()
         # api call履歴がない場合のみ実行
-        if not photo.entity.get('is_api_called'):
-            # Loads the image into memory
-            file_name = "static/image/{}".format(t)
-            with io.open(file_name, 'rb') as image_file:
-                content = image_file.read()
-            image = types.Image(content=content)
-            # Performs label detection on the image file
-            logger.info("calling Vision API with {}".format(t))
+        if not photo.entity.get('is_api_called') or do_all:
             try:
-                response = client.landmark_detection(image=image)
-                logger.info("API was called successfully with {}".format(t))
-            except Exception as e:
-                logger.error("API call was failed with {}".format(t))
-                logger.error(e)
-            # update entity
-            try:
-                annotation = response.landmark_annotations
+                # VisionAPI
+                annotation = get_landmark_by_visionapi(photo.entity['path'])
                 photo.entity['is_api_called'] = True
                 if annotation:
-                    photo.entity['landmark'] = annotation[0].description
-                    photo.entity['score'] = annotation[0].score
+                    photo.entity['landmark'] = annotation.description
+                    photo.entity['score'] = annotation.score
                     photo.entity['location'] = GeoPoint(
-                        annotation[0].locations[0].lat_lng.latitude,
-                        annotation[0].locations[0].lat_lng.longitude
+                        annotation.locations[0].lat_lng.latitude,
+                        annotation.locations[0].lat_lng.longitude
                     )
                 else:
                     photo.entity['landmark'] = None
                 photo.client.put(photo.entity)
-                logger.info("Updated entity successfully with {}".format(t))
+                logger.info("Updated entity successfully by Vision API on {}".format(t))
             except Exception as e:
-                logger.error("Updating entity was failed with {}".format(t))
+                logger.error("Updating entity by Vision API was failed on {}".format(t))
                 logger.error(e)
-                logger.error(annotation)
+
+            if photo.entity['landmark']:
+                # geocodingAPI
+                geocode = get_info_by_geocodingapi(
+                    photo.entity['location'].latitude,
+                    photo.entity['location'].longitude,
+                )
+                for k, v in geocode.items():
+                    k = "country_en" if k is "country" else k
+                    photo.entity[k] = v
+                photo.client.put(photo.entity)
+                logger.info("Updated entity successfully by Geocoding API on {}".format(t))
+
+                if photo.entity['country'] in ("Japan", "日本"):
+                    # 日本の住所
+                    japanese_address = get_info_by_geoapi(
+                        photo.entity['location'].latitude,
+                        photo.entity['location'].longitude,
+                    )
+                    for k, v in japanese_address.items():
+                        photo.entity[k] = v
+                    photo.client.put(photo.entity)
+                    logger.info("Updated entity successfully by geo API on {}".format(t))
     return True
-    # {
-    #     mid: "/m/0415qbd"
-    #     description: "Florence"
-    #     score: 0.35203754901885986
-    #     bounding_poly {
-    #         vertices {
-    #             x: 75
-    #             y: 199
-    #         }
-    #         vertices {
-    #             x: 1443
-    #             y: 199
-    #         }
-    #         vertices {
-    #             x: 1443
-    #             y: 438
-    #         }
-    #         vertices {
-    #             x: 75
-    #             y: 438
-    #         }
-    #     }
-    #     locations {
-    #         lat_lng {
+
+
+# Google Maps Geocoding APIから情報取得
+def get_info_by_geocodingapi(latitude, longitude):
+    gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+    result = gmaps.reverse_geocode((latitude, longitude))
+    types = (
+        'premise',  # Ksar d'Aït Ben Haddou"
+        "route",  # Unnamed Road
+        "sublocality",  # Takashimamachi
+        "locality",  # Nagasaki-shi
+        'administrative_area_level_2',  # Province de Ouarzazate
+        "administrative_area_level_1",  # Nakagasaki-ken
+        "country",  # Japan
+    )
+    res = {t: None for t in types}
+    r = result[0]
+    res['formatted_address'] = r['formatted_address']
+    for ac in r['address_components']:
+        for ac_type in ac['types']:
+            if ac_type in types:
+                res[ac_type] = ac['long_name']
+    return res
+
+
+# geo APIから日本の住所情報を取得
+def get_info_by_geoapi(latitude, longitude):
+    url = "http://geoapi.heartrails.com/api/json?method=searchByGeoLocation"
+    params = {
+        "x": longitude,
+        "y": latitude
+    }
+    r = requests.get(url, params=params)
+    data = r.json()['response']['location'][0]
+    res = {
+        "prefecture": data['prefecture'],
+        "city": data['city'],
+        "town": data['town'],
+    }
+    return res
+
+
+# Vision APIからLandmark情報を取得
+def get_landmark_by_visionapi(image_path):
+    # Instantiates a client
+    client = vision.ImageAnnotatorClient()
+    # Loads the image into memory
+    logger.info("loading image of {}".format(image_path))
+    file_name = "static/{}".format(image_path)
+    with io.open(file_name, 'rb') as image_file:
+        content = image_file.read()
+    image = types.Image(content=content)
+    # Performs label detection on the image file
+    logger.info("calling Vision API with {}".format(image_path))
+    try:
+        response = client.landmark_detection(image=image)
+        logger.info("API was called successfully with {}".format(image_path))
+        if response.landmark_annotations:
+            return response.landmark_annotations[0]
+        else:
+            logger.info("Got no annotation from {}".format(image_path))
+            return None
+    except Exception as e:
+        logger.error("Failed to get annotations of {}".format(image_path))
+        logger.error(e)
+        return None
+    # annotation = {
+    #     score: 0.35203754901885986,
+    #     description: "Florence",
+    #     locations: {
+    #         lat_lng: {
     #             latitude: 43.767902
     #             longitude: 11.257285
     #         }
     #     }
     # }
+
+
+
+
 
 # >>> response_label.label_annotations
 # [
