@@ -77,8 +77,8 @@ def ajax(request):
                 else:
                     sample[k] = v
             samples.append(sample)
-        # sampleは20件取得
-        samples = random.sample(samples, 20) if len(samples) > 20 else samples
+        # sampleは24件取得
+        samples = random.sample(samples, 24) if len(samples) > 24 else samples
 
         # データ数が少ないとwcがうまくいかない→数を増やす
         while True:
@@ -143,7 +143,7 @@ def photo(request):
                 wordcloud_list.append(pl)
 
     # sampling
-    photo = random.sample(photo, 20) if len(photo) > 20 else photo
+    photo = random.sample(photo, 24) if len(photo) > 24 else photo
     while True:
         if len(wordcloud_list) > 30:
             break
@@ -191,6 +191,48 @@ def photo_edit(request, id):
             return redirect('ra:photo')
     else:
         raise Http404
+
+
+@access_time.measure
+def photo_detail(request, id):
+    photo_data = dict()
+    photo_geocoding = dict()
+    target_properties = (
+        # VisionAPI
+        "location", "landmark", "score",
+        # geocodingAPI
+        "formatted_address",
+        "country_en",
+        "administrative_area_level_1",
+        "administrative_area_level_2",
+        "locality", "sublocality",
+        "route", "premise",
+        # geoAPI
+        "city", "town",
+        # Input
+        "country", "prefecture", "sitename", "comment", "path",
+        "datetime",
+    )
+    # target_geocoding = (
+    #     # geocodingAPI
+    #     "formatted_address",
+    #     "country_en",
+    #     "administrative_area_level_1",
+    #     "administrative_area_level_2",
+    #     "locality", "sublocality",
+    #     "route", "premise",
+    # )
+    photo = f_datastore.Photo().get_entity_by_id(id)
+    for k, v in photo.entity.items():
+        if k in target_properties and v:
+            photo_data[k] = v
+        # if k in target_geocoding and v:
+        #     photo_geocoding[k] = v
+    output = {
+        "photo": photo_data,
+        "score_percent": photo.entity.get('score', 0) * 100
+    }
+    return TemplateResponse(request, 'ra/photo_detail.html', output)
 
 # ============================================================
 @access_time.measure

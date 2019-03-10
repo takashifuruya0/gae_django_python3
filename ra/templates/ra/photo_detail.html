@@ -1,0 +1,85 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}Detail{% endblock %}
+
+{% block body %}
+<div class="row">
+  <div class="col-12 col-md-8">
+    <img src="{% static photo.path %}" class="img-fluid" width="100%">
+  </div>
+  <style>
+    html { height: 100% }
+    body { height: 100% }
+  </style>
+  <div class="col-12 col-md-4">
+    <h4>Vision API</h4>
+    <dl class="row">
+      <dd class="col-5"><h5>Landmark</h5></dd>
+      <dt class="col-7">{{photo.landmark}}</dt>
+      <dd class="col-5"><h5>Location</h5></dd>
+      <dt class="col-7">(
+        {{photo.location.latitude | floatformat:"-2"}},
+        {{photo.location.longitude | floatformat:"-2"}}
+        )
+      </dt>
+      <dd class="col-5"><h5>Score</h5></dd>
+      <dt class="col-7">
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" style="width: {{score_percent}}%" aria-valuenow="{{photo.score}}" aria-valuemin="0" aria-valuemax="1">
+            {{photo.score | floatformat:"-3"}}
+          </div>
+        </div>
+      </dt>
+    </dl>
+  </div>
+</div>
+<hr>
+<div class="row">
+  <div class="col-12 col-md-5">
+    <h5><i class="far fa-map"></i> Map</h5>
+    <div id="map" ></div>
+  </div>
+  <div class="col-12 col-md-7">
+    <table class="table table-light">
+      {% for k, v in photo.items%}
+      <tr>
+        <th>{{k}}</th>
+        <td>{{v}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+<script>
+var MyLatLng = new google.maps.LatLng(
+  {{photo.location.latitude}},
+  {{photo.location.longitude}}
+);
+var Options = {
+ zoom: 15,      //地図の縮尺値
+ center: MyLatLng,    //地図の中心座標
+ mapTypeId: 'roadmap'   //地図の種類
+};
+var map = new google.maps.Map(document.getElementById('map'), Options);
+var marker = new google.maps.Marker({
+  position: MyLatLng,
+  map: map
+});
+
+function set_map_size() {
+  if (window.innerWidth < 768) {
+    $('#map').width("100%")
+    $('#map').height(300)
+  } else {
+    $('#map').width("100%")
+    $('#map').height(400)
+  }
+}
+window.addEventListener("resize", function(){set_map_size()})
+window.onload = function(){set_map_size()}
+
+
+</script>
+
+</div>
+{% endblock %}

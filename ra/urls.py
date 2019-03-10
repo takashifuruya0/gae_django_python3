@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^ajax/$', views.ajax, name='ajax'),
     url(r'^photo/$', views.photo, name='photo'),
     url(r'^photo/edit/(?P<id>\d+)/$', views.photo_edit, name='photo_edit'),
+    url(r'^photo/detail/(?P<id>\d+)/$', views.photo_detail, name='photo_detail'),
 ]
