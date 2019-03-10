@@ -3,53 +3,182 @@
 {% block title %}Detail{% endblock %}
 
 {% block body %}
-<div class="row">
-  <div class="col-12 col-md-8">
-    <img src="{% static photo.path %}" class="img-fluid" width="100%">
-  </div>
-  <style>
-    html { height: 100% }
-    body { height: 100% }
-  </style>
-  <div class="col-12 col-md-4">
-    <h4>Vision API</h4>
-    <dl class="row">
-      <dd class="col-5"><h5>Landmark</h5></dd>
-      <dt class="col-7">{{photo.landmark}}</dt>
-      <dd class="col-5"><h5>Location</h5></dd>
-      <dt class="col-7">(
-        {{photo.location.latitude | floatformat:"-2"}},
-        {{photo.location.longitude | floatformat:"-2"}}
-        )
-      </dt>
-      <dd class="col-5"><h5>Score</h5></dd>
-      <dt class="col-7">
-        <div class="progress">
-          <div class="progress-bar" role="progressbar" style="width: {{score_percent}}%" aria-valuenow="{{photo.score}}" aria-valuemin="0" aria-valuemax="1">
-            {{photo.score | floatformat:"-3"}}
+<div class="wrapper">
+  <!-- Sidebar  -->
+  <nav id="sidebar">
+    <!--Sidebar header-->
+    <div class="sidebar-header">
+      <a href="{% url 'ra:photo' %}">
+        <h4><i class="fas fa-camera-retro"></i> Where to Visit?</h4>
+      </a>
+      <a href="{% url 'ra:photo' %}">
+        <strong>WV</strong>
+      </a>
+    </div>
+    <!--Sidebar list-->
+    <ul class="list-unstyled components">
+      <li>
+        <a href="{%url 'ra:main'%}">
+          <i class="fas fa-info-circle"></i> About
+        </a>
+      </li>
+      <hr>
+      <li>
+        <a href="#dataSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+          <i class="fas fa-location-arrow"></i> Close places
+        </a>
+        <ul class="collapse list-unstyled" id="dataSubmenu">
+          {% for cp in close_places %}
+          <li>
+            <a href="{%url 'ra:photo_detail' id=cp.id%}"><img src="{% static cp.path_resized_480 %}" width="100%"></a>
+          </li>
+          {% endfor %}
+        </ul>
+      </li>
+
+    </ul>
+  </nav>
+
+  <div id="content">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <button type="button" id="sidebarCollapse" class="btn btn-info">
+          <i class="fas fa-align-left"></i>
+          <span>Toggle Sidebar</span>
+        </button>
+        {% if title %}<h4>{{title}}</h4>{% endif %}
+        <p>© 2019 fk-management.com</p>
+      </div>
+    </nav>
+
+    <div class="row">
+      <div class="col-12 col-xl-8">
+        <div class="card">
+          <img src="{% static photo.path %}" class="card-img-top" width="100%">
+          <div class="card-body">
+            <!--<h5 class="card-title">{{photo.datetime | date }}</h5>-->
+            <dl class="row">
+              <dt class="col-4"><i class="fas fa-calendar-day"></i> Date</dt>
+              <dd class="col-8">{{photo.datetime | date}}</dd>
+              <dt class="col-4"><i class="fas fa-globe"></i> Country</dt>
+              <dd class="col-8">
+                <h5><span class="badge badge-pill badge-warning">{{photo.country}}</span></h5>
+              </dd>
+              <dt class="col-4"><i class="fas fa-map-signs"></i> Prefecture</dt>
+              <dd class="col-8">
+                <h5><span class="badge badge-pill badge-warning">{{photo.prefecture}}</span></h5>
+              </dd>
+              <dt class="col-4"><i class="fas fa-map-marker-alt"></i> Site</dt>
+              <dd class="col-8">
+                <h5><span class="badge badge-pill badge-warning">{{photo.sitename}}</span></h5>
+              </dd>
+              <dt class="col-4"><i class="fas fa-comment"></i> Comment</dt>
+              <dd class="col-8">{{photo.comment}}</dd>
+            </dl>
           </div>
         </div>
-      </dt>
-    </dl>
+      </div>
+      <style>
+        html { height: 100% }
+        body { height: 100% }
+      </style>
+
+      <hr>
+      <div class="col-12 col-xl-4">
+        <div class="row">
+          <div class="col-12 col-lg-6 col-xl-12">
+            <div class="card">
+              <div class="card-header">
+                <h5>Vision API</h5>
+              </div>
+              <div class="card-body">
+                {% if photo.landmark %}
+                <dl class="row">
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">
+                    <i class="fas fa-landmark"></i> Landmark
+                  </dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.landmark}}</dd>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">
+                    <i class="fas fa-map-marker-alt"></i> Location
+                  </dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">(
+                    {{photo.location.latitude | floatformat:"-2"}},
+                    {{photo.location.longitude | floatformat:"-2"}}
+                    )
+                  </dd>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5"><i class="fas fa-star"></i> Score</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">
+                    <div class="progress">
+                      <div class="progress-bar" role="progressbar" style="width: {{score_percent}}%" aria-valuenow="{{photo.score}}" aria-valuemin="0" aria-valuemax="1">
+                        {{photo.score | floatformat:"-3"}}
+                      </div>
+                    </div>
+                  </dd>
+                </dl>
+                {% else %}
+                <i class="fas fa-exclamation-triangle"></i> No information
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6 col-xl-12">
+            <div class="card">
+              <div class="card-header">
+                <h5>Geocoding API</h5>
+              </div>
+              <div class="card-body">
+                {% if photo.country_en %}
+                <dl class="row">
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Country</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.country_en}}</dd>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Area 1</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.administrative_area_level_1}}</dd>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Area 2</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.administrative_area_level_2}}</dd>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Locality</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.locality}}</dd>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Sub locality</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.sublocality}}</dd>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Route</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.route}}</dd>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Premise</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.premise}}</dd>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Address</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.formatted_address}}</dd>
+                  {% if photo.city %}
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Prefecture</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.prefecture}}</dd>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">City</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.city}}</dd>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Town</dt>
+                  <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.town}}</dd>
+                  {% endif %}
+                </dl>
+                {% else %}
+                <i class="fas fa-exclamation-triangle"></i> No information
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if photo.landmark %}
+    <hr>
+    <div class="row">
+      <div class="col-12">
+        <h5><i class="far fa-map"></i> Map</h5>
+        <div id="map"></div>
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>
-<hr>
-<div class="row">
-  <div class="col-12 col-md-5">
-    <h5><i class="far fa-map"></i> Map</h5>
-    <div id="map" ></div>
-  </div>
-  <div class="col-12 col-md-7">
-    <table class="table table-light">
-      {% for k, v in photo.items%}
-      <tr>
-        <th>{{k}}</th>
-        <td>{{v}}</td>
-      </tr>
-      {% endfor %}
-    </table>
-  </div>
+{% endblock %}
 
+{% block script %}
 <script>
 var MyLatLng = new google.maps.LatLng(
   {{photo.location.latitude}},
@@ -77,9 +206,5 @@ function set_map_size() {
 }
 window.addEventListener("resize", function(){set_map_size()})
 window.onload = function(){set_map_size()}
-
-
 </script>
-
-</div>
 {% endblock %}

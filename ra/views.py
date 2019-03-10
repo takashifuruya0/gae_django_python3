@@ -213,23 +213,22 @@ def photo_detail(request, id):
         "country", "prefecture", "sitename", "comment", "path",
         "datetime",
     )
-    # target_geocoding = (
-    #     # geocodingAPI
-    #     "formatted_address",
-    #     "country_en",
-    #     "administrative_area_level_1",
-    #     "administrative_area_level_2",
-    #     "locality", "sublocality",
-    #     "route", "premise",
-    # )
+    # entity
     photo = f_datastore.Photo().get_entity_by_id(id)
     for k, v in photo.entity.items():
         if k in target_properties and v:
             photo_data[k] = v
-        # if k in target_geocoding and v:
-        #     photo_geocoding[k] = v
+    if photo.entity.get('landmark'):
+        close_places = f_datastore.Photo() \
+        .filter("locality", "=", photo.entity.get('locality')) \
+        .get_list()
+    else:
+        close_places = f_datastore.Photo()\
+        .filter("prefecture", "=", photo.entity.get('prefecture')) \
+        .get_list()
     output = {
         "photo": photo_data,
+        "close_places": close_places,
         "score_percent": photo.entity.get('score', 0) * 100
     }
     return TemplateResponse(request, 'ra/photo_detail.html', output)
