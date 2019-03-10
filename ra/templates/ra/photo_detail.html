@@ -89,24 +89,20 @@
           <div class="col-12 col-lg-6 col-xl-12">
             <div class="card">
               <div class="card-header">
-                <h5>Vision API</h5>
+                <h5><i class="fas fa-landmark"></i> Landmark Info</h5>
               </div>
               <div class="card-body">
                 {% if photo.landmark %}
                 <dl class="row">
-                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">
-                    <i class="fas fa-landmark"></i> Landmark
-                  </dt>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Landmark</dt>
                   <dd class="col-12 col-md-7 col-lg-12 col-xl-7">{{photo.landmark}}</dd>
-                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">
-                    <i class="fas fa-map-marker-alt"></i> Location
-                  </dt>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Location</dt>
                   <dd class="col-12 col-md-7 col-lg-12 col-xl-7">(
                     {{photo.location.latitude | floatformat:"-2"}},
                     {{photo.location.longitude | floatformat:"-2"}}
                     )
                   </dd>
-                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5"><i class="fas fa-star"></i> Score</dt>
+                  <dt class="col-12 col-md-5 col-lg-12 col-xl-5">Score</dt>
                   <dd class="col-12 col-md-7 col-lg-12 col-xl-7">
                     <div class="progress">
                       <div class="progress-bar" role="progressbar" style="width: {{score_percent}}%" aria-valuenow="{{photo.score}}" aria-valuemin="0" aria-valuemax="1">
@@ -125,7 +121,7 @@
           <div class="col-12 col-lg-6 col-xl-12">
             <div class="card">
               <div class="card-header">
-                <h5>Geocoding API</h5>
+                <h5><i class="fas fa-map-marked-alt"></i> Address Info</h5>
               </div>
               <div class="card-body">
                 {% if photo.country_en %}
