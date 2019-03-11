@@ -1,0 +1,21 @@
+# [START django_app]
+runtime: python37
+entrypoint: gunicorn -b :$PORT gae_django_python3.wsgi:application --env DJANGO_SETTINGS_MODULE=gae_django_python3.environment.gae
+automatic_scaling:
+  min_idle_instances: automatic   # idle状態にあるインスタンスの最小値
+  max_idle_instances: 1                 # idle状態にあるインスタンスの最大値
+  min_pending_latency: 3000ms  # リクエストを処理するまでに許される待ち時間の最小
+  max_pending_latency: automatic
+
+handlers:
+# This configures Google App Engine to serve the files in the app's static
+# directory.
+- url: /static
+  static_dir: static
+
+# This handler routes all requests not caught above to your main app. It is
+# required when static routes are defined, but can be omitted (along with
+# the entire handlers section) when there are no static files defined.
+- url: .*
+  script: auto
+# [END django_app]
