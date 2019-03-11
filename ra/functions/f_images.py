@@ -13,6 +13,40 @@ import logging
 logger = logging.getLogger('django')
 
 
+def create_entity_of_new_photos():
+    target = os.listdir('static/image')
+    target.remove("resized")
+    for t in target:
+        # resize
+        photo = f_datastore.Photo().filter("path", "=", "image/{}".format(t)).get_entity()
+        if not photo.entity:
+            photo.data = {
+                "country": "Check",
+                "prefecture": "Check",
+                "sitename": "Check",
+                "path": "image/{}".format(t),
+                'is_api_called': False,
+            }
+            img = Image.open("static/image/{}".format(t))
+            resize_sizes = (1200, 480)
+            for width_rev in resize_sizes:
+                height_rev = img.height * width_rev / img.width
+                img_resize = img.resize((int(width_rev), int(height_rev)))
+                img_resize.save("static/resized_{0}/{1}".format(width_rev, t))
+                photo.data['path_resized_{}'.format(width_rev)] = "resized_{0}/{1}".format(width_rev, t)
+            photo.data['datetime'] = get_datetime(img)
+            photo.create()
+    update_entities_by_api()
+    return True
+
+
+def apply_data_to_check():
+    photos = f_datastore.Photo().filter("country", "=", "Check").get_list()
+    for p in photos:
+        photo_applying = f_datastore.Photo().filter("country", "=", "Check").get_list()
+
+
+
 def resize_images():
     target = os.listdir('static/image')
     target.remove("resized")
@@ -81,7 +115,7 @@ def update_entities_by_api(do_all=False):
                 photo.client.put(photo.entity)
                 logger.info("Updated entity successfully by Geocoding API on {}".format(t))
 
-                if photo.entity['country'] in ("Japan", "日本"):
+                if photo.entity['country'] in ("Japan", "日本") or photo.entity['country_en'] in ("Japan", "日本"):
                     # 日本の住所
                     japanese_address = get_info_by_geoapi(
                         photo.entity['location'].latitude,

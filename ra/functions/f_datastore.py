@@ -23,7 +23,11 @@ class Fds():
             return list(self.query.fetch())
 
     def get_entity(self):
-        self.entity = list(self.query.fetch())[0]
+        entities = list(self.query.fetch())
+        if entities:
+            self.entity = entities[0]
+        else:
+            pass
         return self
 
     def get_entity_by_id(self, id):
