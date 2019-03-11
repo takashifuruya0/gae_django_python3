@@ -1,5 +1,5 @@
 steps:
 - name: 'alpine'
-  args: ['echo', '${_ENVIRONMENT}']
+  args: ['echo', 'production']
 - name: 'gcr.io/cloud-builders/gcloud'
   args: ['app', 'deploy', 'app_for_gcb.yaml']
