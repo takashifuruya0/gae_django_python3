@@ -6,12 +6,12 @@ automatic_scaling:
   min_pending_latency: 3000ms  
   max_pending_latency: automatic
 
-env_variables:
-  _DB_NAME: ${_DB_NAME}
-  _DB_USER: ${_DB_USER}
-  _DB_HOST: ${_DB_HOST}
-  _DB_PASSWORD: ${_DB_PASSWORD}
-  _DB_PORT: ${_DB_PORT}
+#env_variables:
+#  _DB_NAME: ${_DB_NAME}
+#  _DB_USER: ${_DB_USER}
+#  _DB_HOST: ${_DB_HOST}
+#  _DB_PASSWORD: ${_DB_PASSWORD}
+#  _DB_PORT: ${_DB_PORT}
 
 handlers:
 - url: /static
