@@ -30,7 +30,7 @@
         <ul class="collapse list-unstyled" id="dataSubmenu">
           {% for cp in close_places %}
           <li>
-            <a href="{%url 'ra:photo_detail' id=cp.id%}"><img src="{% static cp.path_resized_480 %}" width="100%"></a>
+            <a href="{%url 'ra:photo_detail' id=cp.id%}"><img src="{{cp.url_resized_480}}" width="100%"></a>
           </li>
           {% endfor %}
         </ul>
@@ -54,7 +54,7 @@
     <div class="row">
       <div class="col-12 col-xl-8">
         <div class="card">
-          <img src="{% static photo.path %}" class="card-img-top" width="100%">
+          <img src="{{photo.url_origin}}" class="card-img-top" width="100%">
           <div class="card-body">
             <!--<h5 class="card-title">{{photo.datetime | date }}</h5>-->
             <dl class="row">

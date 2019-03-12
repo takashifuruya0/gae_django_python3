@@ -175,7 +175,7 @@ def photo_edit(request, id):
             form = PhotoForm(initial=initial)
             output = {
                 "form": form,
-                "path": initial['path']
+                "photo": photo.entity,
             }
             logger.info(output)
             return TemplateResponse(request, 'ra/photo_edit.html', output)
@@ -210,7 +210,7 @@ def photo_detail(request, id):
         # geoAPI
         "city", "town",
         # Input
-        "country", "prefecture", "sitename", "comment", "path",
+        "country", "prefecture", "sitename", "comment", "path", "url_origin",
         "datetime",
     )
     # entity
@@ -219,13 +219,9 @@ def photo_detail(request, id):
         if k in target_properties and v:
             photo_data[k] = v
     if photo.entity.get('landmark'):
-        close_places = f_datastore.Photo() \
-        .filter("locality", "=", photo.entity.get('locality')) \
-        .get_list()
+        close_places = f_datastore.Photo().filter("locality", "=", photo.entity.get('locality')).get_list()
     else:
-        close_places = f_datastore.Photo()\
-        .filter("prefecture", "=", photo.entity.get('prefecture')) \
-        .get_list()
+        close_places = f_datastore.Photo().filter("prefecture", "=", photo.entity.get('prefecture')).get_list()
     output = {
         "photo": photo_data,
         "close_places": close_places,

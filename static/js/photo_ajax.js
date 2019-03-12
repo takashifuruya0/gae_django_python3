@@ -24,7 +24,8 @@ function draw_cards(data_ajax){
         .append('div')
           .attr("class", "card")
         .append('img')
-          .attr("src", "/static/"+sample.path_resized_480)
+//          .attr("src", "/static/"+sample.path_resized_480)
+          .attr("src", sample.url_resized_480)
           .attr("width", "100%")
           .attr("data-toggle", "modal")
           .attr("data-target", "#"+sample.id)
@@ -65,7 +66,8 @@ function draw_cards(data_ajax){
         .attr("class", "modal-body")
       // img
       body.append('img')
-        .attr("src", "/static/" + sample.path_resized_1200)
+//        .attr("src", "/static/" + sample.path_resized_1200)
+        .attr("src", sample.url_resized_1200)
         .attr("width", "100%")
       // table
       var table = body.append("table").attr("class", "table")
