@@ -26,7 +26,9 @@ def top(request):
 
 def ajax(request):
     if request.method in ('POST', "GET"):
-        target_properties = ("prefecture", "country", "sitename")
+        target_properties = (
+            "prefecture", "country", "sitename", "country_en", "landmark", "locality"
+        )
         # GET
         prop = request.GET.get('prop', None)
         text = request.GET.get('text', None)
@@ -51,7 +53,8 @@ def ajax(request):
             }
         for p in photo:
             for tp in target_properties:
-                property_list[tp][p[tp]]['count'] += 1
+                if p.get(tp, None):
+                    property_list[tp][p[tp]]['count'] += 1
         for pls in property_list.values():
             for pl in pls.values():
                 check = {
@@ -105,60 +108,8 @@ def ajax(request):
 
 @access_time.measure
 def photo(request):
-    labels = list()
-    target_properties = ("prefecture", "country", "sitename")
-    for f in target_properties:
-        param = request.GET.get(f, None)
-        if param:
-            labels.append({
-                "key": f,
-                "val": param,
-            })
-            photo = f_datastore.Photo().filter(f, "=", param).get_list()
-            break
-        else:
-            photo = f_datastore.Photo().get_list()
-    # wordcloud
-    wordcloud_list = list()
-    property_list = dict()
-    for tp in target_properties:
-        property_list[tp] = {
-            f[tp]: {
-                "word": f[tp],
-                "property": tp,
-                "count": 0,
-                "url": "?{0}={1}".format(tp, f[tp])
-            } for f in f_datastore.Photo().distinct(tp).get_list()
-        }
-    for p in photo:
-        for tp in target_properties:
-            property_list[tp][p[tp]]['count'] += 1
-    for pls in property_list.values():
-        for pl in pls.values():
-            check = {
-                "key": pl["property"],
-                "val": pl['word']
-            }
-            if pl['count'] > 0 and not check in labels:
-                wordcloud_list.append(pl)
-
-    # sampling
-    photo = random.sample(photo, 24) if len(photo) > 24 else photo
-    while True:
-        if len(wordcloud_list) > 30:
-            break
-        else:
-            wordcloud_list += wordcloud_list
-    for tp in target_properties:
-        property_list[tp] = list(property_list[tp].values())
-        property_list[tp].sort(key=lambda x: x['count'], reverse=True)
     output = {
-        "photo": photo,
-        "label": labels[0]['val'] if labels else "",
         "title": "Where to Visit ?",
-        "today": datetime.today(),
-        "wordcloud_list": wordcloud_list,
-        "property_list": property_list,
         "environment": settings.ENVIRONMENT,
     }
     return TemplateResponse(request, "ra/photo.html", output)

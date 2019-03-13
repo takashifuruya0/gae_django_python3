@@ -87,6 +87,18 @@ function draw_cards(data_ajax){
         .attr("class", "badge badge-pill badge-warning")
         .attr("onclick", do_on_click('sitename', sample.sitename))
         .text(sample.sitename)
+      td0.append('span')
+        .attr("class", "badge badge-pill badge-warning")
+        .attr("onclick", do_on_click('country_en', sample.country_en))
+        .text(sample.country_en)
+      td0.append('span')
+        .attr("class", "badge badge-pill badge-warning")
+        .attr("onclick", do_on_click('locality', sample.locality))
+        .text(sample.locality)
+      td0.append('span')
+        .attr("class", "badge badge-pill badge-warning")
+        .attr("onclick", do_on_click('landmark', sample.landmark))
+        .text(sample.landmark)
       // landmark/location detected by VisionAPI
       if (sample.landmark){
           var tr3 = table.append("tr")
@@ -249,6 +261,36 @@ var update_sidebar = function (data_ajax) {
     for (sample of data_ajax.property_list.country) {  // 配列のfor文はof
         if (sample.count > 0){
             ul_country.append('li').append('a')
+                .attr("onclick", "update_photo_by_sidebar('" + sample.property +"', '" + sample.word + "')")
+                .html(sample.word + '<span class="badge badge-pill badge-light" style="color:black;">' + sample.count + '</span>')
+        }
+    }
+    // country_en
+    var ul_country_en = d3.select('#countryEnSubmenu')
+    ul_country_en.selectAll('li').remove()
+    for (sample of data_ajax.property_list.country_en) {  // 配列のfor文はof
+        if (sample.count > 0){
+            ul_country_en.append('li').append('a')
+                .attr("onclick", "update_photo_by_sidebar('" + sample.property +"', '" + sample.word + "')")
+                .html(sample.word + '<span class="badge badge-pill badge-light" style="color:black;">' + sample.count + '</span>')
+        }
+    }
+    // landmark
+    var ul_landmark = d3.select('#landmarkSubmenu')
+    ul_landmark.selectAll('li').remove()
+    for (sample of data_ajax.property_list.landmark) {  // 配列のfor文はof
+        if (sample.count > 0){
+            ul_landmark.append('li').append('a')
+                .attr("onclick", "update_photo_by_sidebar('" + sample.property +"', '" + sample.word + "')")
+                .html(sample.word + '<span class="badge badge-pill badge-light" style="color:black;">' + sample.count + '</span>')
+        }
+    }
+    // locality
+    var ul_locality = d3.select('#localitySubmenu')
+    ul_locality.selectAll('li').remove()
+    for (sample of data_ajax.property_list.locality) {  // 配列のfor文はof
+        if (sample.count > 0){
+            ul_locality.append('li').append('a')
                 .attr("onclick", "update_photo_by_sidebar('" + sample.property +"', '" + sample.word + "')")
                 .html(sample.word + '<span class="badge badge-pill badge-light" style="color:black;">' + sample.count + '</span>')
         }
