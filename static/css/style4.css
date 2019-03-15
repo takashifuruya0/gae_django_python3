@@ -162,7 +162,8 @@ span {
     border-bottom: 1px solid #47748b;
 }
 
-#sidebar ul li a {
+#sidebar ul li a,
+#sidebar ul h4{
     padding: 10px;
     font-size: 1.1em;
     display: block;

@@ -1,7 +1,7 @@
 var TARGET_ELEMENT_ID = '#wordcloud'; // 描画先
 if (window.innerWidth > 768) {
-  var h = 400;
-  var w = 1200;
+  var h = 500;
+  var w = 1000;
 }else{
   var h = 400;
   var w = 500;
