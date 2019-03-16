@@ -10,6 +10,7 @@ from google.cloud.storage import Blob
 import googlemaps
 import requests
 from django.conf import settings
+from ra.functions import f_lib
 import logging
 if settings.ENVIRONMENT == "gae":
     logger = logging.getLogger()
@@ -18,62 +19,12 @@ else:
 
 
 def create_entity_of_new_photos():
-    # datastore
-    client_datastore = datastore.Client()
     # storage
     client_storage = storage.Client()
     bucket = client_storage.get_bucket(settings.SECRET['PROJECT_NAME'])
     target = list(bucket.list_blobs(prefix="to_be_processed/"))[1:]
-    # process
-    resize_sizes = (1200, 480)
     for t in target:
-        # copy target image
-        logger.info("Target: {}".format(t.name))
-        file_name = t.name.split("/")[1]
-        blob_origin = bucket.copy_blob(blob=t, destination_bucket=bucket, new_name="image/{}".format(file_name))
-        blob_origin.make_public()
-        logger.info("{} is copied to {}".format(t.name, blob_origin.name))
-        # resize
-        query = client_datastore.query(kind=settings.DATASTORE_KIND)
-        query.add_filter("path", "=", blob_origin.name)
-        photos = list(query.fetch())
-        if not photos:
-            # preparing
-            img = Image.open(io.BytesIO(t.download_as_string()))
-            data = {
-                "country": "Check",
-                "prefecture": "Check",
-                "sitename": "Check",
-                "path": blob_origin.name,
-                "url_origin": blob_origin.public_url,
-                'is_api_called': False,
-                'datetime': get_datetime(img),
-            }
-            # resizing image
-            for width_rev in resize_sizes:
-                logger.info("Resizing {} to the width of {}".format(blob_origin.name, width_rev))
-                height_rev = img.height * width_rev / img.width
-                img_resize = img.resize((int(width_rev), int(height_rev)))
-                f_name = "resized_{}/{}".format(width_rev, t.name.split("/")[1])
-                bio = io.BytesIO()
-                img_resize.save(bio, format='jpeg')
-                blob = Blob(f_name, bucket)
-                blob.upload_from_string(data=bio.getvalue(), content_type="image/jpeg")
-                blob.make_public()
-                logger.info("Completed resizing {} to the width of {}".format(blob_origin.name, width_rev))
-                data["url_resized_{}".format(width_rev)] = blob.public_url
-            # creating entity
-            logger.info("Creating entity of {}".format(blob_origin.name))
-            entity = datastore.Entity(key=client_datastore.key(settings.DATASTORE_KIND))
-            entity.update(data)
-            client_datastore.put(entity)
-            logger.info("Completed creating entity of {}".format(blob_origin.name))
-        # delete target photo
-        logger.info("Deleting {}".format(t.name))
-        t.delete()
-        logger.info("Completed deleting {}".format(t.name))
-    # APIでentityをアップデートする
-    update_entities_by_api()
+        create_entity_of_new_photo(t.name)
     return True
 
 
@@ -371,7 +322,7 @@ def update_entity_by_api(path):
 
         if photo['landmark']:
             # geocodingAPI
-            photo['sitename'] = photo['landmark']
+            # photo['sitename'] = photo['landmark']
             geocode = get_info_by_geocodingapi(
                 photo['location'].latitude,
                 photo['location'].longitude,
@@ -379,6 +330,15 @@ def update_entity_by_api(path):
             for k, v in geocode.items():
                 k = "country_en" if k is "country" else k
                 photo[k] = v
+            # 日本語化
+            # country
+            photo['country'] = f_lib.translate_en_to_ja(photo['country_en'])
+            # prefecture
+            text = photo['locality'] if photo['locality'] else photo['administrative_area_level_1']
+            photo['prefecture'] = f_lib.translate_en_to_ja(text)
+            # landmark
+            photo['sitename'] = f_lib.translate_en_to_ja(photo['landmark'])
+            # update
             client_datastore.put(photo)
             logger.info("Updated entity successfully by Geocoding API on {}".format(photo.key))
 
