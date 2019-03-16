@@ -8,7 +8,7 @@ from ra.form import PhotoForm
 from django.contrib import messages
 import json
 import random
-from ra.functions import access_time
+from ra.functions import access_time, f_images
 
 
 # Create your views here.
@@ -196,3 +196,21 @@ def photo_detail(request, id):
         "score_percent": photo.get('score', 0) * 100
     }
     return TemplateResponse(request, 'ra/photo_detail.html', output)
+
+
+# f_images.create_entity_of_new_photos()を実行
+def process_create(request):
+    if request.POST.get("token") == settings.SECRET['TOKEN_PROCESS_CREATE']:
+        try:
+            logger.info("f_images.create_entity_of_new_photos() is called via HTTP request.")
+            res_data = {
+                "result": f_images.create_entity_of_new_photos()
+            }
+            response = json.dumps(res_data)  # JSON形式に直して・・
+            logger.info("f_images.create_entity_of_new_photos() is completed")
+            return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・
+        except Exception as e:
+            logger.error(e)
+            raise Http404
+    else:
+        raise Http404
