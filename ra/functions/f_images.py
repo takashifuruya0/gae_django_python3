@@ -324,22 +324,15 @@ def create_entity_of_new_photo(blob_name):
     logger.info("Completed deleting {}".format(t.name))
 
     # APIでentityをアップデートする
-    update_entity_by_api(entity['path'])
+    update_entity_by_api(entity)
     return True
 
 
 # apiの情報でentityをupdate
-def update_entity_by_api(path):
+def update_entity_by_api(photo):
     client_datastore = datastore.Client()
     client_storage = storage.Client()
     bucket = client_storage.get_bucket(settings.SECRET['PROJECT_NAME'])
-    query = client_datastore.query(kind=settings.DATASTORE_KIND)
-    query.add_filter("path", "=", path)
-    photo_query = list(query.fetch())
-    if photo_query:
-        photo = photo_query[0]
-    else:
-        return False
     # api call履歴がない場合のみ実行
     if not photo.get('is_api_called'):
         logger.info("The entity of {} will be updated by calling APIs".format(photo.key))
@@ -365,6 +358,7 @@ def update_entity_by_api(path):
 
         if photo['landmark']:
             # geocodingAPI
+            photo['sitename'] = photo['landmark']
             geocode = get_info_by_geocodingapi(
                 photo['location'].latitude,
                 photo['location'].longitude,
