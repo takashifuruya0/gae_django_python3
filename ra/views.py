@@ -6,7 +6,7 @@ from ra.form import PhotoForm
 from django.contrib import messages
 import json
 import random
-from ra.functions import access_time, f_images
+from ra.functions import access_time, f_images, f_lib
 # csrf_exempt
 from django.views.decorators.csrf import csrf_exempt
 # logging
@@ -225,3 +225,15 @@ def process_create(request):
     }
     response = json.dumps(res_data)  # JSON形式に直して・・
     return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・
+
+
+@csrf_exempt
+def apply_dev_to_prod(request):
+    if request.POST.get("token") == settings.SECRET['TOKEN_PROCESS_CREATE']:
+        result = f_lib.apply_dev_to_prod()
+    else:
+        result = False
+    # response
+    res_data = {"result": result}
+    response = json.dumps(res_data)  # JSON形式に直して・・
+    return HttpResponse(response, content_type="text/javascript")

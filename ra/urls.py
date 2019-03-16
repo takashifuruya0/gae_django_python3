@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^photo/detail/(?P<id>\d+)/edit/$', views.photo_edit, name='photo_edit'),
     url(r'^photo/detail/(?P<id>\d+)/$', views.photo_detail, name='photo_detail'),
     url(r'^photo/process/create/$', views.process_create, name='process_create'),
+    url(r'^photo/process/apply_dev_to_prod/$', views.apply_dev_to_prod, name='process_apply'),
 ]
