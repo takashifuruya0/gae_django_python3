@@ -200,6 +200,8 @@ def photo_detail(request, id):
 
 # f_images.create_entity_of_new_photos()を実行
 def process_create(request):
+    logger.info(request.GET)
+    logger.info(request.POST)
     if request.POST.get("token") == settings.SECRET['TOKEN_PROCESS_CREATE']:
         try:
             logger.info("f_images.create_entity_of_new_photo() is called via HTTP request.")
@@ -209,6 +211,7 @@ def process_create(request):
             logger.error(e)
             raise Http404
     else:
+        logger.info("{} does not match with the TOKEN".format(request.POST.get("token")))
         result = False
     res_data = {
         "result": result
