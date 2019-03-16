@@ -92,7 +92,7 @@ def update_entities_by_api(do_all=False):
     for photo in target_photos:
         # api call履歴がない場合のみ実行
         if not photo.get('is_api_called') or do_all:
-            logger.info("The entity of {} will be updated by calling APIs".format(photo))
+            logger.info("The entity of {} will be updated by calling APIs".format(photo.key))
             try:
                 blob = bucket.get_blob(photo['path'])
                 # VisionAPI
@@ -108,9 +108,9 @@ def update_entities_by_api(do_all=False):
                 else:
                     photo['landmark'] = None
                 client_datastore.put(photo)
-                logger.info("Updated entity successfully by Vision API on {}".format(photo))
+                logger.info("Updated entity successfully by Vision API on {}".format(photo.key))
             except Exception as e:
-                logger.error("Updating entity by Vision API was failed on {}".format(photo))
+                logger.error("Updating entity by Vision API was failed on {}".format(photo.key))
                 logger.error(e)
 
             if photo['landmark']:
@@ -123,7 +123,7 @@ def update_entities_by_api(do_all=False):
                     k = "country_en" if k is "country" else k
                     photo[k] = v
                 client_datastore.put(photo)
-                logger.info("Updated entity successfully by Geocoding API on {}".format(photo))
+                logger.info("Updated entity successfully by Geocoding API on {}".format(photo.key))
 
                 if photo['country'] == "日本" or photo['country_en'] == "Japan":
                     # 日本の住所
@@ -138,7 +138,7 @@ def update_entities_by_api(do_all=False):
                     client_datastore.put(photo)
                     logger.info("Updated entity successfully by geo API on {}".format(photo))
         else:
-            logger.info("{} has already called APIs".format(photo))
+            logger.info("{} has already called APIs".format(photo.key))
     return True
 
 
@@ -190,7 +190,7 @@ def get_landmark_by_visionapi(image_data):
     logger.info("loading image")
     image = types.Image(content=image_data)
     # Performs label detection on the image file
-    logger.info("calling Vision API with {}".format(image_data))
+    logger.info("calling Vision API")
     try:
         response = client.landmark_detection(image=image)
         logger.info("API was called successfully")
