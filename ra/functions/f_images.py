@@ -11,7 +11,10 @@ import googlemaps
 import requests
 from django.conf import settings
 import logging
-logger = logging.getLogger('django')
+if settings.ENVIRONMENT == "gae":
+    logger = logging.getLogger()
+else:
+    logger = logging.getLogger('django')
 
 
 def create_entity_of_new_photos():

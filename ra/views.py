@@ -1,8 +1,6 @@
 from django.template.response import TemplateResponse
 from django.shortcuts import HttpResponse, Http404, redirect
 from django.conf import settings
-import logging
-logger = logging.getLogger('django')
 from google.cloud import datastore
 from ra.form import PhotoForm
 from django.contrib import messages
@@ -11,6 +9,12 @@ import random
 from ra.functions import access_time, f_images
 # csrf_exempt
 from django.views.decorators.csrf import csrf_exempt
+# logging
+import logging
+if settings.ENVIRONMENT == "gae":
+    logger = logging.getLogger()
+else:
+    logger = logging.getLogger('django')
 
 
 # Create your views here.
