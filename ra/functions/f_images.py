@@ -316,6 +316,8 @@ def create_entity_of_new_photo(blob_name):
             blob.make_public()
             logger.info("Completed resizing {} to the width of {}".format(blob_origin.name, width_rev))
             data["url_resized_{}".format(width_rev)] = blob.public_url
+        # memory開放
+        del bio
         # creating entity
         logger.info("Creating entity of {}".format(blob_origin.name))
         entity = datastore.Entity(key=client_datastore.key(settings.DATASTORE_KIND))
