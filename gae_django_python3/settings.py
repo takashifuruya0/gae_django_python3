@@ -172,6 +172,7 @@ LOGGING = {
 
 # 環境
 ENVIRONMENT = "local"
+DATASTORE_KIND = "PhotoDev"
 GOOGLE_MAPS_API_KEY = 'AIzaSyAh8y3Id_CH3YVRCstZVB99M_aHPHT_UbQ'
 
 # Twitter

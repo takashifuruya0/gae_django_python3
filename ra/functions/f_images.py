@@ -1,11 +1,12 @@
 from PIL import Image
-from ra.functions import f_datastore
 from datetime import datetime
-import os
 import io
 from google.cloud import vision
 from google.cloud.vision import types
+from google.cloud import datastore
 from google.cloud.datastore.helpers import GeoPoint
+from google.cloud import storage
+from google.cloud.storage import Blob
 import googlemaps
 import requests
 from django.conf import settings
@@ -14,54 +15,62 @@ logger = logging.getLogger('django')
 
 
 def create_entity_of_new_photos():
-    target = os.listdir('static/image')
-    target.remove("resized")
+    # datastore
+    client_datastore = datastore.Client()
+    # storage
+    client_storage = storage.Client()
+    bucket = client_storage.get_bucket(settings.SECRET['PROJECT_NAME'])
+    target = list(bucket.list_blobs(prefix="to_be_processed/"))[1:]
+    # process
+    resize_sizes = (1200, 480)
     for t in target:
+        # copy target image
+        logger.info("Target: {}".format(t.name))
+        file_name = t.name.split("/")[1]
+        blob_origin = bucket.copy_blob(blob=t, destination_bucket=bucket, new_name="image/{}".format(file_name))
+        blob_origin.make_public()
+        logger.info("{} is copied to {}".format(t.name, blob_origin.name))
         # resize
-        photo = f_datastore.Photo().filter("path", "=", "image/{}".format(t)).get_entity()
-        if not photo.entity:
-            photo.data = {
+        query = client_datastore.query(kind=settings.DATASTORE_KIND)
+        query.add_filter("path", "=", blob_origin.name)
+        photos = list(query.fetch())
+        if not photos:
+            # preparing
+            img = Image.open(io.BytesIO(t.download_as_string()))
+            data = {
                 "country": "Check",
                 "prefecture": "Check",
                 "sitename": "Check",
-                "path": "image/{}".format(t),
+                "path": blob_origin.name,
+                "url_origin": blob_origin.public_url,
                 'is_api_called': False,
+                'datetime': get_datetime(img),
             }
-            img = Image.open("static/image/{}".format(t))
-            resize_sizes = (1200, 480)
+            # resizing image
             for width_rev in resize_sizes:
+                logger.info("Resizing {} to the width of {}".format(blob_origin.name, width_rev))
                 height_rev = img.height * width_rev / img.width
                 img_resize = img.resize((int(width_rev), int(height_rev)))
-                img_resize.save("static/resized_{0}/{1}".format(width_rev, t))
-                photo.data['path_resized_{}'.format(width_rev)] = "resized_{0}/{1}".format(width_rev, t)
-            photo.data['datetime'] = get_datetime(img)
-            photo.create()
+                f_name = "resized_{}/{}".format(width_rev, t.name.split("/")[1])
+                bio = io.BytesIO()
+                img_resize.save(bio, format='jpeg')
+                blob = Blob(f_name, bucket)
+                blob.upload_from_string(data=bio.getvalue(), content_type="image/jpeg")
+                blob.make_public()
+                logger.info("Completed resizing {} to the width of {}".format(blob_origin.name, width_rev))
+                data["url_resized_{}".format(width_rev)] = blob.public_url
+            # creating entity
+            logger.info("Creating entity of {}".format(blob_origin.name))
+            entity = datastore.Entity(key=client_datastore.key(settings.DATASTORE_KIND))
+            entity.update(data)
+            client_datastore.put(entity)
+            logger.info("Completed creating entity of {}".format(blob_origin.name))
+        # delete target photo
+        logger.info("Deleting {}".format(t.name))
+        t.delete()
+        logger.info("Completed deleting {}".format(t.name))
+    # APIでentityをアップデートする
     update_entities_by_api()
-    return True
-
-
-def apply_data_to_check():
-    photos = f_datastore.Photo().filter("country", "=", "Check").get_list()
-    for p in photos:
-        photo_applying = f_datastore.Photo().filter("country", "=", "Check").get_list()
-
-
-
-def resize_images():
-    target = os.listdir('static/image')
-    target.remove("resized")
-    for t in target:
-        # resize
-        img = Image.open("static/image/{}".format(t))
-        photo = f_datastore.Photo().filter("path", "=", "image/{}".format(t)).get_entity()
-        resize_sizes = (1200, 480)
-        for width_rev in resize_sizes:
-            height_rev = img.height * width_rev / img.width
-            img_resize = img.resize((int(width_rev), int(height_rev)))
-            img_resize.save("static/resized_{0}/{1}".format(width_rev, t))
-            photo.entity['path_resized_{}'.format(width_rev)] = "resized_{0}/{1}".format(width_rev, t)
-        photo.entity['datetime'] = get_datetime(img)
-        photo.update()
     return True
 
 
@@ -76,55 +85,60 @@ def get_datetime(img):
 
 # apiの情報でentityをupdate
 def update_entities_by_api(do_all=False):
-    # target
-    target = os.listdir('static/image')
-    target.remove("resized")
-    for t in target:
-        # entity
-        photo = f_datastore.Photo().filter("path", "=", "image/{}".format(t)).get_entity()
+    client_datastore = datastore.Client()
+    client_storage = storage.Client()
+    bucket = client_storage.get_bucket(settings.SECRET['PROJECT_NAME'])
+    target_photos = list(client_datastore.query(kind=settings.DATASTORE_KIND).fetch())
+    for photo in target_photos:
         # api call履歴がない場合のみ実行
-        if not photo.entity.get('is_api_called') or do_all:
+        if not photo.get('is_api_called') or do_all:
+            logger.info("The entity of {} will be updated by calling APIs".format(photo))
             try:
+                blob = bucket.get_blob(photo['path'])
                 # VisionAPI
-                annotation = get_landmark_by_visionapi(photo.entity['path'])
-                photo.entity['is_api_called'] = True
+                annotation = get_landmark_by_visionapi(blob.download_as_string())
+                photo['is_api_called'] = True
                 if annotation:
-                    photo.entity['landmark'] = annotation.description
-                    photo.entity['score'] = annotation.score
-                    photo.entity['location'] = GeoPoint(
+                    photo['landmark'] = annotation.description
+                    photo['score'] = annotation.score
+                    photo['location'] = GeoPoint(
                         annotation.locations[0].lat_lng.latitude,
                         annotation.locations[0].lat_lng.longitude
                     )
                 else:
-                    photo.entity['landmark'] = None
-                photo.client.put(photo.entity)
-                logger.info("Updated entity successfully by Vision API on {}".format(t))
+                    photo['landmark'] = None
+                client_datastore.put(photo)
+                logger.info("Updated entity successfully by Vision API on {}".format(photo))
             except Exception as e:
-                logger.error("Updating entity by Vision API was failed on {}".format(t))
+                logger.error("Updating entity by Vision API was failed on {}".format(photo))
                 logger.error(e)
 
-            if photo.entity['landmark']:
+            if photo['landmark']:
                 # geocodingAPI
                 geocode = get_info_by_geocodingapi(
-                    photo.entity['location'].latitude,
-                    photo.entity['location'].longitude,
+                    photo['location'].latitude,
+                    photo['location'].longitude,
                 )
                 for k, v in geocode.items():
                     k = "country_en" if k is "country" else k
-                    photo.entity[k] = v
-                photo.client.put(photo.entity)
-                logger.info("Updated entity successfully by Geocoding API on {}".format(t))
+                    photo[k] = v
+                client_datastore.put(photo)
+                logger.info("Updated entity successfully by Geocoding API on {}".format(photo))
 
-                if photo.entity['country'] in ("Japan", "日本") or photo.entity['country_en'] in ("Japan", "日本"):
+                if photo['country'] == "日本" or photo['country_en'] == "Japan":
                     # 日本の住所
+                    photo['country'] = "日本"
+                    photo['country_en'] = "Japan"
                     japanese_address = get_info_by_geoapi(
-                        photo.entity['location'].latitude,
-                        photo.entity['location'].longitude,
+                        photo['location'].latitude,
+                        photo['location'].longitude,
                     )
                     for k, v in japanese_address.items():
-                        photo.entity[k] = v
-                    photo.client.put(photo.entity)
-                    logger.info("Updated entity successfully by geo API on {}".format(t))
+                        photo[k] = v
+                    client_datastore.put(photo)
+                    logger.info("Updated entity successfully by geo API on {}".format(photo))
+        else:
+            logger.info("{} has already called APIs".format(photo))
     return True
 
 
@@ -169,27 +183,24 @@ def get_info_by_geoapi(latitude, longitude):
 
 
 # Vision APIからLandmark情報を取得
-def get_landmark_by_visionapi(image_path):
+def get_landmark_by_visionapi(image_data):
     # Instantiates a client
     client = vision.ImageAnnotatorClient()
     # Loads the image into memory
-    logger.info("loading image of {}".format(image_path))
-    file_name = "static/{}".format(image_path)
-    with io.open(file_name, 'rb') as image_file:
-        content = image_file.read()
-    image = types.Image(content=content)
+    logger.info("loading image")
+    image = types.Image(content=image_data)
     # Performs label detection on the image file
-    logger.info("calling Vision API with {}".format(image_path))
+    logger.info("calling Vision API with {}".format(image_data))
     try:
         response = client.landmark_detection(image=image)
-        logger.info("API was called successfully with {}".format(image_path))
+        logger.info("API was called successfully")
         if response.landmark_annotations:
             return response.landmark_annotations[0]
         else:
-            logger.info("Got no annotation from {}".format(image_path))
+            logger.info("Got no annotation")
             return None
     except Exception as e:
-        logger.error("Failed to get annotations of {}".format(image_path))
+        logger.error("Failed to get annotations")
         logger.error(e)
         return None
     # annotation = {

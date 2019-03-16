@@ -15,7 +15,7 @@ from ra.functions import access_time
 @access_time.measure
 def top(request):
     client = datastore.Client()
-    photos = list(client.query(kind="Photo").fetch())
+    photos = list(client.query(kind=settings.DATASTORE_KIND).fetch())
     bg_photo = random.choice(photos)
     output = {
         "text": "Hello world",
@@ -35,18 +35,18 @@ def ajax(request):
         text = request.GET.get('text', None)
         labels = [{"key": prop, "val": text}, ]
         if prop and text and prop in target_properties:
-            query = client.query(kind="Photo")
+            query = client.query(kind=settings.DATASTORE_KIND)
             query.add_filter(prop, "=", text)
             photo = list(query.fetch())
             logger.info("ajax:parameter prop={} text={}".format(prop, text))
         else:
-            photo = list(client.query(kind="Photo").fetch())
+            photo = list(client.query(kind=settings.DATASTORE_KIND).fetch())
             logger.info("ajax:without parameter")
         # Word Cloud
         wordcloud_list = list()
         property_list = dict()
         for tp in target_properties:
-            query = client.query(kind="Photo")
+            query = client.query(kind=settings.DATASTORE_KIND)
             query.distinct_on = tp
             property_list[tp] = {
                 f[tp]: {
@@ -124,7 +124,7 @@ def photo(request):
 def photo_edit(request, id):
     client = datastore.Client()
     if settings.ENVIRONMENT == "local":
-        key = client.key("Photo", int(id))
+        key = client.key(settings.DATASTORE_KIND, int(id))
         photo = client.get(key=key)
         if request.method == "GET":
             initial = dict()
@@ -177,13 +177,13 @@ def photo_detail(request, id):
     )
     # entity
     client = datastore.Client()
-    key = client.key("Photo", int(id))
+    key = client.key(settings.DATASTORE_KIND, int(id))
     photo = client.get(key=key)
     for k, v in photo.items():
         if k in target_properties and v:
             photo_data[k] = v
     # close places
-    query = client.query(kind="Photo")
+    query = client.query(kind=settings.DATASTORE_KIND)
     if photo.get('landmark'):
         query.add_filter("locality", "=", photo.get('locality'))
     else:
