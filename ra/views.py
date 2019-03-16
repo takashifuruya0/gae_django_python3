@@ -202,15 +202,16 @@ def photo_detail(request, id):
 def process_create(request):
     if request.POST.get("token") == settings.SECRET['TOKEN_PROCESS_CREATE']:
         try:
-            logger.info("f_images.create_entity_of_new_photos() is called via HTTP request.")
-            res_data = {
-                "result": f_images.create_entity_of_new_photos()
-            }
-            response = json.dumps(res_data)  # JSON形式に直して・・
-            logger.info("f_images.create_entity_of_new_photos() is completed")
-            return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・
+            logger.info("f_images.create_entity_of_new_photo() is called via HTTP request.")
+            result = f_images.create_entity_of_new_photo(request.POST.get('blob_name'))
+            logger.info("f_images.create_entity_of_new_photo() is completed")
         except Exception as e:
             logger.error(e)
             raise Http404
     else:
-        raise Http404
+        result = False
+    res_data = {
+        "result": result
+    }
+    response = json.dumps(res_data)  # JSON形式に直して・・
+    return HttpResponse(response, content_type="text/javascript")  # 返す。JSONはjavascript扱いなのか・
