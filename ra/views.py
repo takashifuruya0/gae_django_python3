@@ -9,6 +9,8 @@ from django.contrib import messages
 import json
 import random
 from ra.functions import access_time, f_images
+# csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Create your views here.
@@ -199,6 +201,7 @@ def photo_detail(request, id):
 
 
 # f_images.create_entity_of_new_photos()を実行
+@csrf_exempt
 def process_create(request):
     logger.info(request.GET)
     logger.info(request.POST)
