@@ -18,6 +18,7 @@ DATABASES = {
     }
 }
 
+# production
 ENVIRONMENT = "gae"
 DEBUG = False
 DATASTORE_KIND = "Photo"
