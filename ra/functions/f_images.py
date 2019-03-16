@@ -192,6 +192,7 @@ def get_landmark_by_visionapi(image_data):
     # Loads the image into memory
     logger.info("loading image")
     image = types.Image(content=image_data)
+    del image_data
     # Performs label detection on the image file
     logger.info("calling Vision API")
     try:
