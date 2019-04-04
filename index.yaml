@@ -1,11 +1,5 @@
 indexes:
 
-- kind: Training
-  properties:
-  - name: name
-  - name: datetime
-    direction: desc
-
 - kind: Photo
   properties:
   - name: sitename
@@ -25,3 +19,67 @@ indexes:
   - name: country_en
   - name: city
   - name: town
+
+- kind: Photo
+  properties:
+  - name: sitename
+  - name: prefecture
+  - name: country
+  - name: landmark
+  - name: score
+  - name: location
+  - name: datetime
+    direction: desc
+  - name: administrative_area_level_1
+  - name: country_en
+
+- kind: Photo
+  properties:
+  - name: sitename
+  - name: prefecture
+  - name: country
+  - name: landmark
+  - name: score
+  - name: location
+  - name: datetime
+    direction: desc
+  - name: locality
+  - name: country_en
+
+
+- kind: PhotoDev
+  properties:
+  - name: sitename
+  - name: prefecture
+  - name: country
+  - name: landmark
+  - name: score
+  - name: location
+  - name: datetime
+    direction: desc
+
+- kind: PhotoDev
+  properties:
+  - name: sitename
+  - name: prefecture
+  - name: country
+  - name: landmark
+  - name: score
+  - name: location
+  - name: datetime
+    direction: desc
+  - name: administrative_area_level_1
+  - name: country_en
+
+- kind: PhotoDev
+  properties:
+  - name: sitename
+  - name: prefecture
+  - name: country
+  - name: landmark
+  - name: score
+  - name: location
+  - name: datetime
+    direction: desc
+  - name: locality
+  - name: country_en
